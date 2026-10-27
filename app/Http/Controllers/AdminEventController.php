@@ -184,10 +184,13 @@ class AdminEventController extends Controller
             abort(403);
         }
 
+        $photoName = $photo->original_name;
         Storage::disk('public')->delete($photo->path);
         $photo->delete();
 
-        return back()->with('ok', 'Foto berhasil dihapus.');
+        ActivityLog::record('delete_event', "Menghapus foto dokumentasi '{$photoName}' pada rapat '{$event->title}'");
+
+        return back()->with('ok', 'Foto dokumentasi berhasil dihapus.');
     }
 
     /** Export CSV dengan cursor streaming O(1) memory. */

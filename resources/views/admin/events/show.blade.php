@@ -117,19 +117,35 @@
       $totalPhotos = $photos->count();
     @endphp
 
-    {{-- Foto yang sudah diunggah (Bersih tanpa tombol menempel) --}}
+    {{-- Foto yang sudah diunggah --}}
     @foreach($photos as $photo)
-      <div class="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition duration-200">
+      <div class="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition duration-200 relative">
         <div class="relative w-full aspect-[4/3] bg-slate-100 overflow-hidden cursor-pointer"
              data-url="{{ $photo->url }}"
              data-name="{{ $photo->original_name }}"
              data-delete-url="{{ route('admin.events.photos.destroy', [$event, $photo]) }}"
              onclick="previewPhoto(this.dataset.url, this.dataset.name, this.dataset.deleteUrl)"
-             title="Klik untuk melihat / hapus foto">
+             title="Klik untuk melihat foto lebih besar">
           <img src="{{ $photo->url }}" alt="{{ $photo->original_name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+          
+          {{-- Tombol Hapus Cepat di Pojok Kanan Atas Foto --}}
+          <form method="POST" action="{{ route('admin.events.photos.destroy', [$event, $photo]) }}"
+                data-confirm="Hapus foto '{{ addslashes($photo->original_name) }}' dari dokumentasi rapat?"
+                data-confirm-title="Hapus Foto Dokumentasi"
+                data-confirm-btn="Ya, Hapus"
+                class="absolute top-2 right-2 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition duration-200 z-10"
+                onclick="event.stopPropagation()">
+            @csrf @method('DELETE')
+            <button type="submit" 
+                    class="w-7 h-7 rounded-xl bg-white/95 hover:bg-rose-50 text-rose-600 hover:text-rose-700 shadow-md border border-rose-200 flex items-center justify-center transition cursor-pointer"
+                    title="Hapus foto ini">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </form>
         </div>
-        <div class="py-1.5 px-2 text-center text-[11px] font-medium text-slate-400 bg-white border-t border-slate-100 truncate" title="{{ $photo->original_name }}">
-          {{ $photo->ext }} - {{ $photo->human_size }}
+        <div class="py-1.5 px-2.5 flex items-center justify-between text-[11px] font-medium text-slate-400 bg-white border-t border-slate-100">
+          <span class="truncate" title="{{ $photo->original_name }}">{{ $photo->ext }} · {{ $photo->human_size }}</span>
+          <span class="text-[10px] text-slate-400 font-semibold">{{ $photo->is_portrait ? 'Potrait' : 'Landscape' }}</span>
         </div>
       </div>
     @endforeach
@@ -426,6 +442,7 @@ function previewPhoto(url, title, deleteUrl) {
   const formDelete = document.getElementById('formDeletePhoto');
   if (deleteUrl && formDelete) {
     formDelete.action = deleteUrl;
+    delete formDelete.dataset.confirmed;
     formDelete.style.display = '';
   } else if (formDelete) {
     formDelete.style.display = 'none';

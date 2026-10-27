@@ -114,10 +114,10 @@
     }
 
     confirmBtn.onclick = function() {
+      const cb = pendingConfirmCallback;
+      pendingConfirmCallback = null;
       closeGlobalModal();
-      if (typeof pendingConfirmCallback === 'function') {
-        const cb = pendingConfirmCallback;
-        pendingConfirmCallback = null;
+      if (typeof cb === 'function') {
         cb();
       }
     };
@@ -233,6 +233,12 @@
       const btnText = form.getAttribute('data-confirm-btn') || 'Ya, Hapus';
       const type = form.getAttribute('data-confirm-type') || 'danger';
       
+      // Jika form berada di dalam modal preview foto, tutup dulu modal preview foto agar modal konfirmasi tampil jelas di depan
+      const previewModal = document.getElementById('modalPreviewPhoto');
+      if (previewModal && previewModal.open) {
+        previewModal.close();
+      }
+
       showConfirmModal({
         title: title,
         message: confirmMsg,
@@ -240,13 +246,8 @@
         cancelText: 'Batal',
         type: type,
         onConfirm: function() {
-          // Tutup modal preview foto jika sedang aktif agar transisi mulus
-          const previewModal = document.getElementById('modalPreviewPhoto');
-          if (previewModal && previewModal.open) {
-            previewModal.close();
-          }
           form.dataset.confirmed = 'true';
-          form.submit();
+          HTMLFormElement.prototype.submit.call(form);
         }
       });
     }
