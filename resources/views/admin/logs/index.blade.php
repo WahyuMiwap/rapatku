@@ -23,73 +23,9 @@
 @endsection
 
 @section('admin')
-<div class="mt-4 space-y-4">
+<div class="mt-4">
 
-  {{-- 1. KARTU STATISTIK RINGKASAN AKTIVITAS --}}
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-    {{-- Total Log --}}
-    <div class="card p-4 sm:p-5 flex items-center gap-3.5">
-      <div class="w-11 h-11 rounded-2xl bg-[#EAF0FA] text-[#174A9E] flex items-center justify-center shrink-0 shadow-2xs">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-        </svg>
-      </div>
-      <div class="min-w-0">
-        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Catatan</div>
-        <div class="text-lg sm:text-xl font-black text-[#0F2F5B] mt-0.5 tabular">{{ number_format($totalLogs) }}</div>
-      </div>
-    </div>
-
-    {{-- Login Berhasil --}}
-    <div class="card p-4 sm:p-5 flex items-center gap-3.5">
-      <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 shadow-2xs">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      </div>
-      <div class="min-w-0">
-        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Login Berhasil</div>
-        <div class="text-lg sm:text-xl font-black text-emerald-600 mt-0.5 tabular">{{ number_format($totalSuccessLogins) }}</div>
-      </div>
-    </div>
-
-    {{-- Percobaan Login Gagal --}}
-    <div class="card p-4 sm:p-5 flex items-center gap-3.5">
-      <div class="w-11 h-11 rounded-2xl {{ $totalFailedLogins > 0 ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-slate-50 text-slate-400 border border-slate-100' }} flex items-center justify-center shrink-0 shadow-2xs">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </div>
-      <div class="min-w-0">
-        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Login Gagal</div>
-        <div class="text-lg sm:text-xl font-black {{ $totalFailedLogins > 0 ? 'text-rose-600' : 'text-slate-500' }} mt-0.5 tabular">
-          {{ number_format($totalFailedLogins) }}
-        </div>
-      </div>
-    </div>
-
-    {{-- Login Terakhir --}}
-    <div class="card p-4 sm:p-5 flex items-center gap-3.5">
-      <div class="w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100 shadow-2xs">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 11-18 0z" />
-        </svg>
-      </div>
-      <div class="min-w-0">
-        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Login Terakhir</div>
-        @if($lastLoginLog)
-          <div class="text-xs font-bold text-[#0F2F5B] mt-0.5 truncate" title="{{ $lastLoginLog->user_email }}">
-            {{ $lastLoginLog->user_email }}
-          </div>
-          <div class="text-[10px] text-slate-400">{{ $lastLoginLog->created_at->diffForHumans() }}</div>
-        @else
-          <div class="text-xs text-slate-400 mt-0.5 italic">Belum ada</div>
-        @endif
-      </div>
-    </div>
-  </div>
-
-  {{-- 2. PANEL FILTER, PENCARIAN & TABEL LOG --}}
+  {{-- PANEL FILTER, PENCARIAN & TABEL LOG --}}
   <div class="card p-5 sm:p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
       <div>

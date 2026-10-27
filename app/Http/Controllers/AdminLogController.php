@@ -45,11 +45,8 @@ class AdminLogController extends Controller
             $query->where('created_at', '>=', Carbon::now()->subDays(30));
         }
 
-        // Statistik Ringkasan Cepat
+        // Total log untuk kondisi tombol bersihkan
         $totalLogs = ActivityLog::count();
-        $totalSuccessLogins = ActivityLog::where('activity', 'login')->count();
-        $totalFailedLogins = ActivityLog::where('activity', 'login_failed')->count();
-        $lastLoginLog = ActivityLog::where('activity', 'login')->latest()->first();
 
         // Data terpaginasi (15 per halaman)
         $logs = $query->latest('id')->paginate(15)->withQueryString();
@@ -71,9 +68,6 @@ class AdminLogController extends Controller
             'activity',
             'dateFilter',
             'totalLogs',
-            'totalSuccessLogins',
-            'totalFailedLogins',
-            'lastLoginLog',
             'availableActivities'
         ));
     }
