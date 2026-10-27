@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\Attendee;
 use App\Models\Category;
 use App\Models\Event;
@@ -115,7 +116,7 @@ class AdminEventController extends Controller
             $logoPath = $request->file('logo')->store("events/{$slug}", 'public');
         }
 
-        Event::create([
+        $event = Event::create([
             'slug' => $slug,
             'title' => $validated['title'],
             'event_date' => $validated['event_date'],
@@ -123,6 +124,8 @@ class AdminEventController extends Controller
             'logo_path' => $logoPath,
             'is_active' => true,
         ]);
+
+        ActivityLog::record('create_event', "Membuat rapat baru: {$event->title}");
 
         return back()->with('ok', 'Rapat dibuat.');
     }
@@ -136,9 +139,12 @@ class AdminEventController extends Controller
 
     public function destroy(Event $event)
     {
+        $title = $event->title;
         Storage::disk('local')->deleteDirectory("events/{$event->slug}");
         Storage::disk('public')->deleteDirectory("events/{$event->slug}");
         $event->delete();
+
+        ActivityLog::record('delete_event', "Menghapus rapat: {$title}");
 
         return redirect()->route('admin.events.index')->with('ok', 'Rapat dihapus.');
     }
@@ -518,6 +524,8 @@ class AdminEventController extends Controller
             'password' => $validated['password'],
         ]);
 
+        ActivityLog::record('change_password', 'Memperbarui password akun admin');
+
         return back()->with('ok', 'Password berhasil diperbarui.');
     }
 
@@ -529,6 +537,8 @@ class AdminEventController extends Controller
         ]);
 
         $request->user()->update($validated);
+
+        ActivityLog::record('update_settings', "Memperbarui profil admin: {$request->user()->name} ({$request->user()->email})");
 
         return back()->with('ok', 'Profil berhasil disimpan.');
     }

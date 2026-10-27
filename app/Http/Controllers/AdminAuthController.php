@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,6 +36,8 @@ class AdminAuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            ActivityLog::record('login', 'Berhasil login ke sistem admin', Auth::user(), $request);
+
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'ok' => true,
@@ -44,6 +47,8 @@ class AdminAuthController extends Controller
 
             return redirect()->intended(route('admin.dashboard'));
         }
+
+        ActivityLog::record('login_failed', 'Percobaan login gagal untuk ' . ($request->input('email') ?: 'email tidak valid'), null, $request);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -57,6 +62,10 @@ class AdminAuthController extends Controller
 
     public function logout(Request $request)
     {
+        if (Auth::check()) {
+            ActivityLog::record('logout', 'Logout dari sistem admin', Auth::user(), $request);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

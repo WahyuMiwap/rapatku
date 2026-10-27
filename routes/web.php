@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminAttendeeController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminEventController;
+use App\Http\Controllers\AdminLogController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
@@ -60,6 +61,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/attendees/{attendee}', [AdminAttendeeController::class, 'update'])->name('attendees.update');
     Route::delete('/attendees/{attendee}', [AdminAttendeeController::class, 'destroy'])->name('attendees.destroy');
     Route::get('/attendees/{attendee}/signature', [AdminAttendeeController::class, 'signature'])->name('attendees.signature');
+
+    // Log Aktivitas Sistem & Riwayat Login
+    Route::get('/logs', [AdminLogController::class, 'index'])->name('logs.index');
+    Route::delete('/logs', [AdminLogController::class, 'destroyAll'])->name('logs.destroy');
 });
 
 Route::get('/manifest.json', [AdminEventController::class, 'manifest'])->name('manifest');

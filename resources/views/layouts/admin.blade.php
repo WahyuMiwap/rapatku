@@ -35,6 +35,12 @@
               </svg>
               <span>Pengaturan</span>
             </a>
+            <a href="{{ route('admin.logs.index') }}" class="side-link {{ $active === 'logs' ? 'active' : '' }}">
+              <svg class="w-4 h-4 shrink-0 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 11-18 0z" />
+              </svg>
+              <span>Log Aktivitas</span>
+            </a>
           </nav>
         </div>
 
@@ -74,6 +80,19 @@
             @endif
             <form method="POST" action="{{ route('logout') }}" class="md:hidden">@csrf<button class="text-xs bg-slate-200 rounded-lg px-3 py-1.5 font-bold">Logout</button></form>
           </div>
+        </div>
+
+        {{-- Navigasi Mobile Responsif --}}
+        <div class="md:hidden flex items-center gap-1.5 overflow-x-auto pb-1 mt-3 mb-2 text-xs">
+          <a href="{{ route('admin.dashboard') }}" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition {{ in_array($active, ['dashboard', 'events', 'detail']) ? 'bg-[#0F2F5B] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200' }}">
+            Kelola Rapat
+          </a>
+          <a href="{{ route('admin.settings.index') }}" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition {{ $active === 'settings' ? 'bg-[#0F2F5B] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200' }}">
+            Pengaturan
+          </a>
+          <a href="{{ route('admin.logs.index') }}" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition {{ $active === 'logs' ? 'bg-[#0F2F5B] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200' }}">
+            Log Aktivitas
+          </a>
         </div>
 
         @yield('admin')
