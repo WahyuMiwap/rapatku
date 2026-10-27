@@ -322,25 +322,34 @@
       <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
       </svg>
-      Halaman 2: Lampiran Foto Dokumentasi (Otomatis tercetak di kertas terpisah)
+      Halaman 2: Dokumentasi Foto (Otomatis tercetak di kertas terpisah)
     </span>
     <div class="h-px bg-slate-300 flex-1"></div>
   </div>
 
   {{-- ========================================== --}}
-  {{-- HALAMAN 2: LAMPIRAN (FORMAT BAB DI TENGAH) --}}
+  {{-- HALAMAN 2: DOKUMENTASI (FORMAT RESMI)       --}}
   {{-- (Selalu ganti kertas baru saat dicetak/PDF) --}}
   {{-- ========================================== --}}
   <div class="print-card page-break max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 mt-6 print:mt-0 print:border-none print:shadow-none print:p-0">
     
-    {{-- Judul Bab Bersih: "LAMPIRAN" di Center Atas --}}
-    <div class="text-center pt-2 pb-6 print:pt-4 print:pb-6">
-      <h2 class="font-extrabold text-xl sm:text-2xl text-slate-900 tracking-[0.25em] uppercase">LAMPIRAN</h2>
+    {{-- JUDUL DOKUMEN: DOKUMENTASI & INFORMASI RAPAT (Mirip Format Judul Daftar Hadir) --}}
+    <div class="text-center my-3 pb-2">
+      <h2 class="font-extrabold text-base sm:text-lg text-black uppercase tracking-wider underline underline-offset-4">
+        DOKUMENTASI
+      </h2>
+      <p class="text-xs sm:text-sm font-bold text-slate-800 mt-1 uppercase">{{ $event->title }}</p>
+      <p class="text-xs text-slate-600 mt-0.5">
+        Hari / Tanggal: {{ \Carbon\Carbon::parse($event->event_date)->locale('id')->isoFormat('dddd, D MMMM Y') }}
+        @if($event->category)
+          &nbsp;·&nbsp; Kategori: {{ $event->category }}
+        @endif
+      </p>
     </div>
 
     {{-- Galeri Foto Dokumentasi Langsung di Bawah Bab --}}
     @if($event->photos && $event->photos->count() > 0)
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 print:grid-cols-2 print:gap-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 print:grid-cols-2 print:gap-5 mt-4">
         @foreach($event->photos as $idx => $photo)
           <div class="border border-slate-300 rounded-xl p-2.5 bg-slate-50/50 print:bg-white print:border-slate-400 flex flex-col shadow-2xs">
             <div class="w-full h-52 sm:h-60 print:h-52 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200">
@@ -364,7 +373,7 @@
         </svg>
         <p class="font-bold text-sm">Belum Ada Foto Dokumentasi yang Diunggah</p>
         <p class="text-xs text-amber-700 mt-1 max-w-md mx-auto leading-relaxed">
-          Unggah foto dokumentasi di halaman detail rapat agar foto otomatis tampil di bawah bab Lampiran ini.
+          Unggah foto dokumentasi di halaman detail rapat agar foto otomatis tampil di bawah bab Dokumentasi ini.
         </p>
         <a href="{{ route('admin.events.show', $event) }}" class="inline-flex items-center gap-1.5 mt-3.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-4 py-2 rounded-xl transition shadow-xs">
           + Unggah Foto Dokumentasi Sekarang
@@ -381,6 +390,54 @@
         </div>
       </div>
     @endif
+
+    {{-- Struktur Tanda Tangan Formal Dokumentasi (Mirip Bawah Daftar Hadir) --}}
+    <div class="mt-8 flex justify-end">
+      <div class="w-80 text-center text-sm leading-relaxed text-slate-800 relative">
+        {{-- 1. Lokasi / Kota & Tanggal Pelaksanaan Acara --}}
+        <div id="signatoryCityDateDoc" contenteditable="true" spellcheck="false" 
+             class="hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text font-normal"
+             title="Klik untuk mengedit kota & tanggal">
+          Surabaya, {{ \Carbon\Carbon::parse($event->event_date)->locale('id')->isoFormat('D MMMM Y') }}
+        </div>
+
+        {{-- 2. Jabatan Penandatangan --}}
+        <div id="signatoryJabatanDoc" contenteditable="true" spellcheck="false"
+             class="font-normal hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text mt-0.5"
+             title="Klik untuk mengedit jabatan">
+          {{ $event->jabatan_penandatangan ?: 'Ketua Panitia,' }}
+        </div>
+
+        {{-- 3. Ruang Tempat Tanda Tangan --}}
+        <div class="h-24 sm:h-28 flex items-center justify-center">
+          {{-- Ruang kosong tanda tangan --}}
+        </div>
+
+        {{-- 4. Nama Orang yang Bertanda Tangan (Dengan Dropdown Pilihan Nama & NIP) --}}
+        <div class="relative">
+          <div id="signatoryNameTriggerDoc"
+               onclick="toggleSignatoryDropdown(event, 'doc')"
+               class="inline-flex items-center justify-center gap-1.5 group cursor-pointer hover:bg-amber-50/80 rounded-lg px-2 py-0.5 transition border border-transparent hover:border-amber-200"
+               title="Klik untuk memilih nama penandatangan & NIP otomatis">
+            <span id="signatoryNameTextDoc" contenteditable="true" spellcheck="false"
+                  onclick="event.stopPropagation()"
+                  class="font-bold underline focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1 outline-none cursor-text text-sm">
+              {{ $event->nama_penandatangan ?: 'Nama Penandatangan' }}
+            </span>
+            <svg class="noprint w-3.5 h-3.5 text-slate-400 group-hover:text-[#174A9E] transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          {{-- 5. NIP Penandatangan --}}
+          <div id="signatoryNipTextDoc" contenteditable="true" spellcheck="false"
+               class="text-xs text-slate-700 hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text mt-0.5"
+               title="Klik untuk mengedit NIP">
+            {{ $event->nip_penandatangan ?: 'NIP. ....................................................' }}
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 
@@ -484,10 +541,19 @@
       }).join('');
     }
 
-    function toggleSignatoryDropdown(e) {
+    function toggleSignatoryDropdown(e, context = 'p1') {
       if (e) e.stopPropagation();
       const dropdown = document.getElementById('signatoryDropdown');
       if (!dropdown) return;
+
+      const targetParent = context === 'doc'
+        ? document.getElementById('signatoryNameTriggerDoc')?.parentElement
+        : document.getElementById('signatoryNameTrigger')?.parentElement;
+
+      if (targetParent && dropdown.parentElement !== targetParent) {
+        targetParent.appendChild(dropdown);
+      }
+
       if (dropdown.classList.contains('hidden')) {
         openSignatoryDropdown();
       } else {
@@ -523,12 +589,20 @@
       const nipEl = document.getElementById('signatoryNipText');
       const jabatanEl = document.getElementById('signatoryJabatan');
 
+      const nameDoc = document.getElementById('signatoryNameTextDoc');
+      const nipDoc = document.getElementById('signatoryNipTextDoc');
+      const jabatanDoc = document.getElementById('signatoryJabatanDoc');
+
       const formattedJabatan = jabatan ? (jabatan.trim().endsWith(',') ? jabatan.trim() : jabatan.trim() + ',') : 'Ketua Panitia,';
       const formattedIdentitas = formatIdentitas(jenis, nomor) || 'NIP. ....................................................';
 
       if (nameEl && nama) nameEl.innerText = nama;
       if (jabatanEl) jabatanEl.innerText = formattedJabatan;
       if (nipEl) nipEl.innerText = formattedIdentitas;
+
+      if (nameDoc && nama) nameDoc.innerText = nama;
+      if (jabatanDoc) jabatanDoc.innerText = formattedJabatan;
+      if (nipDoc) nipDoc.innerText = formattedIdentitas;
 
       closeSignatoryDropdown();
 
@@ -589,10 +663,27 @@
     // 3. EVENT LISTENER GLOBAL & INISIALISASI
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
-      // Pasang listener auto-save pada teks yang dapat diedit langsung
-      document.getElementById('signatoryNameText')?.addEventListener('input', triggerAutoSave);
-      document.getElementById('signatoryJabatan')?.addEventListener('input', triggerAutoSave);
-      document.getElementById('signatoryNipText')?.addEventListener('input', triggerAutoSave);
+      // Pasang listener auto-save pada teks yang dapat diedit langsung & sinkronisasi dua arah
+      const cityP1 = document.getElementById('signatoryCityDate');
+      const cityP2 = document.getElementById('signatoryCityDateDoc');
+      const jabP1 = document.getElementById('signatoryJabatan');
+      const jabP2 = document.getElementById('signatoryJabatanDoc');
+      const nameP1 = document.getElementById('signatoryNameText');
+      const nameP2 = document.getElementById('signatoryNameTextDoc');
+      const nipP1 = document.getElementById('signatoryNipText');
+      const nipP2 = document.getElementById('signatoryNipTextDoc');
+
+      cityP1?.addEventListener('input', () => { if (cityP2) cityP2.innerText = cityP1.innerText; triggerAutoSave(); });
+      cityP2?.addEventListener('input', () => { if (cityP1) cityP1.innerText = cityP2.innerText; triggerAutoSave(); });
+
+      jabP1?.addEventListener('input', () => { if (jabP2) jabP2.innerText = jabP1.innerText; triggerAutoSave(); });
+      jabP2?.addEventListener('input', () => { if (jabP1) jabP1.innerText = jabP2.innerText; triggerAutoSave(); });
+
+      nameP1?.addEventListener('input', () => { if (nameP2) nameP2.innerText = nameP1.innerText; triggerAutoSave(); });
+      nameP2?.addEventListener('input', () => { if (nameP1) nameP1.innerText = nameP2.innerText; triggerAutoSave(); });
+
+      nipP1?.addEventListener('input', () => { if (nipP2) nipP2.innerText = nipP1.innerText; triggerAutoSave(); });
+      nipP2?.addEventListener('input', () => { if (nipP1) nipP1.innerText = nipP2.innerText; triggerAutoSave(); });
 
       // Ingat pilihan mode kop terakhir pengguna
       try {
@@ -613,9 +704,10 @@
     // Tutup dropdown jika klik di luar area
     document.addEventListener('click', function(e) {
       const dropdown = document.getElementById('signatoryDropdown');
-      const trigger = document.getElementById('signatoryNameTrigger');
+      const trigger1 = document.getElementById('signatoryNameTrigger');
+      const trigger2 = document.getElementById('signatoryNameTriggerDoc');
       if (dropdown && !dropdown.classList.contains('hidden')) {
-        if (!dropdown.contains(e.target) && !trigger?.contains(e.target)) {
+        if (!dropdown.contains(e.target) && !trigger1?.contains(e.target) && !trigger2?.contains(e.target)) {
           closeSignatoryDropdown();
         }
       }
