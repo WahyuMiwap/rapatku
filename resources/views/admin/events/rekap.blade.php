@@ -163,7 +163,7 @@
 
     {{-- Opsi 2: Format Gambar Asli (Bisa Diaktifkan Lewat Tombol Toolbar) --}}
     <div id="kopSuratImage" class="hidden">
-      <img src="{{ asset('images/kop-bnn.png') }}" alt="Kop Surat BNNK Surabaya" class="w-full object-contain mb-4">
+      <img src="/images/kop-bnn.png" alt="Kop Surat BNNK Surabaya" class="w-full object-contain mb-4">
     </div>
 
     {{-- ======================================================== --}}

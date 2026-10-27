@@ -34,13 +34,15 @@ class AppServiceProvider extends ServiceProvider
                 $files = Storage::disk('public')->files('settings');
                 foreach ($files as $file) {
                     if (str_starts_with(basename($file), 'app_logo.')) {
-                        $customLogo = Storage::disk('public')->url($file);
+                        $fullPath = Storage::disk('public')->path($file);
+                        $mtime = file_exists($fullPath) ? filemtime($fullPath) : time();
+                        $customLogo = '/storage/' . ltrim($file, '/') . '?v=' . $mtime;
                         break;
                     }
                 }
             } catch (\Throwable $e) {}
 
-            $view->with('appLogo', $customLogo ?: asset('images/logo-bnn.png'));
+            $view->with('appLogo', $customLogo ?: '/images/logo-bnn.png');
             $view->with('hasCustomLogo', (bool) $customLogo);
         });
     }

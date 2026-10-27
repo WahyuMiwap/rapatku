@@ -394,13 +394,17 @@ class AdminEventController extends Controller
             ->fragment('penandatangan');
 
         $loginBg = null;
-        $files = Storage::disk('public')->files('settings');
-        foreach ($files as $file) {
-            if (str_starts_with(basename($file), 'login_bg.')) {
-                $loginBg = Storage::disk('public')->url($file);
-                break;
+        try {
+            $files = Storage::disk('public')->files('settings');
+            foreach ($files as $file) {
+                if (str_starts_with(basename($file), 'login_bg.')) {
+                    $fullPath = Storage::disk('public')->path($file);
+                    $mtime = file_exists($fullPath) ? filemtime($fullPath) : time();
+                    $loginBg = '/storage/' . ltrim($file, '/') . '?v=' . $mtime;
+                    break;
+                }
             }
-        }
+        } catch (\Throwable $e) {}
 
         return view('admin.settings', compact('user', 'categories', 'loginBg', 'signatories'));
     }
