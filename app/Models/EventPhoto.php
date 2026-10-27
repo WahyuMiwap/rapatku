@@ -38,4 +38,38 @@ class EventPhoto extends Model
     {
         return strtoupper(pathinfo($this->original_name, PATHINFO_EXTENSION));
     }
+
+    /** Apakah foto berorientasi potrait (tinggi > lebar). */
+    public function getIsPortraitAttribute(): bool
+    {
+        try {
+            $path = Storage::disk('public')->path($this->path);
+            if (file_exists($path)) {
+                $size = @getimagesize($path);
+                if ($size && isset($size[0], $size[1]) && $size[1] > $size[0]) {
+                    return true;
+                }
+            }
+        } catch (\Throwable $e) {
+            // Abaikan kesalahan pembacaan berkas
+        }
+        return false;
+    }
+
+    /** Rasio aspek gambar (lebar / tinggi). */
+    public function getAspectRatioAttribute(): float
+    {
+        try {
+            $path = Storage::disk('public')->path($this->path);
+            if (file_exists($path)) {
+                $size = @getimagesize($path);
+                if ($size && !empty($size[1])) {
+                    return round($size[0] / $size[1], 3);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Abaikan kesalahan pembacaan berkas
+        }
+        return 1.333;
+    }
 }

@@ -347,19 +347,31 @@
       </p>
     </div>
 
-    {{-- Galeri Foto Dokumentasi Langsung di Bawah Bab --}}
+    {{-- Galeri Foto Dokumentasi Langsung di Bawah Bab (Smart Grid Otomatis) --}}
     @if($event->photos && $event->photos->count() > 0)
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 print:grid-cols-2 print:gap-5 mt-4">
-        @foreach($event->photos as $idx => $photo)
-          <div class="border border-slate-300 rounded-xl p-2.5 bg-slate-50/50 print:bg-white print:border-slate-400 flex flex-col shadow-2xs">
-            <div class="w-full h-52 sm:h-60 print:h-52 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200">
-              <img src="{{ $photo->url }}" alt="Foto {{ $idx + 1 }}" class="w-full h-full object-cover">
-            </div>
-            <div class="mt-2 text-center">
-              <div contenteditable="true" spellcheck="false"
-                   class="font-medium text-xs sm:text-sm text-slate-700 hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 outline-none cursor-text transition"
-                   title="Klik untuk mengedit keterangan foto">
-                Foto {{ $idx + 1 }}
+      @php
+        $photoList = $event->photos;
+        $totalPhotos = $photoList->count();
+      @endphp
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 print:grid-cols-2 print:gap-5 mt-4 items-start">
+        @foreach($photoList as $idx => $photo)
+          @php
+            $isPortrait = $photo->is_portrait;
+            $isLastOdd = ($totalPhotos % 2 !== 0) && ($idx === $totalPhotos - 1);
+          @endphp
+          <div class="{{ $isLastOdd ? 'sm:col-span-2 print:col-span-2 flex justify-center' : '' }} break-inside-avoid print:break-inside-avoid">
+            <div class="border border-slate-300 rounded-xl p-2.5 bg-slate-50/50 print:bg-white print:border-slate-400 flex flex-col shadow-2xs w-full {{ $isLastOdd ? ($isPortrait ? 'sm:max-w-sm' : 'sm:max-w-md') : '' }}">
+              <div class="photo-frame w-full rounded-lg overflow-hidden bg-slate-50 print:bg-white flex items-center justify-center border border-slate-200 {{ $isPortrait ? 'h-72 sm:h-80 print:h-72' : 'h-52 sm:h-60 print:h-52' }}">
+                <img src="{{ $photo->url }}" alt="Foto {{ $idx + 1 }}"
+                     onload="adjustPhotoFrame(this)"
+                     class="w-full h-full object-contain transition duration-200">
+              </div>
+              <div class="mt-2 text-center">
+                <div contenteditable="true" spellcheck="false"
+                     class="font-medium text-xs sm:text-sm text-slate-700 hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 outline-none cursor-text transition"
+                     title="Klik untuk mengedit keterangan foto">
+                  Foto {{ $idx + 1 }}
+                </div>
               </div>
             </div>
           </div>
@@ -700,6 +712,23 @@
         }
       } catch (e) {}
     });
+
+    // Deteksi rasio asli gambar di sisi klien untuk memastikan frame potrait/landscape tepat
+    function adjustPhotoFrame(img) {
+      if (img.naturalWidth && img.naturalHeight) {
+        const isPortrait = img.naturalHeight > img.naturalWidth;
+        const frame = img.closest('.photo-frame');
+        if (frame) {
+          if (isPortrait) {
+            frame.classList.remove('h-52', 'sm:h-60', 'print:h-52');
+            frame.classList.add('h-72', 'sm:h-80', 'print:h-72');
+          } else {
+            frame.classList.remove('h-72', 'sm:h-80', 'print:h-72');
+            frame.classList.add('h-52', 'sm:h-60', 'print:h-52');
+          }
+        }
+      }
+    }
 
     // Tutup dropdown jika klik di luar area
     document.addEventListener('click', function(e) {
