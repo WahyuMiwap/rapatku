@@ -103,7 +103,10 @@ class AdminEventController extends Controller
             'title' => ['required', 'string', 'max:150'],
             'event_date' => ['required', 'date'],
             'category' => ['nullable', 'string', 'max:100'],
-            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:3072'],
+        ], [
+            'logo.max' => 'Ukuran logo rapat maksimal 3 MB.',
+            'logo.image' => 'File logo harus berupa gambar.',
         ]);
 
         $slug = Str::slug($validated['title']);
@@ -160,7 +163,12 @@ class AdminEventController extends Controller
         }
 
         $request->validate([
-            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+        ], [
+            'photo.required' => 'Pilih berkas foto terlebih dahulu.',
+            'photo.image' => 'Berkas harus berupa gambar.',
+            'photo.mimes' => 'Format foto harus JPG, JPEG, PNG, atau WEBP.',
+            'photo.max' => 'Ukuran foto maksimal 3 MB.',
         ]);
 
         $file = $request->file('photo');
@@ -553,12 +561,12 @@ class AdminEventController extends Controller
     public function updateLoginBackground(Request $request)
     {
         $request->validate([
-            'login_bg' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'login_bg' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
         ], [
             'login_bg.required' => 'Pilih file gambar terlebih dahulu.',
             'login_bg.image' => 'File harus berupa gambar.',
             'login_bg.mimes' => 'Format gambar harus JPEG, PNG, JPG, atau WEBP.',
-            'login_bg.max' => 'Ukuran gambar maksimal 5 MB.',
+            'login_bg.max' => 'Ukuran gambar maksimal 3 MB.',
         ]);
 
         // Hapus background lama jika ada
@@ -590,12 +598,12 @@ class AdminEventController extends Controller
     public function updateLogo(Request $request)
     {
         $request->validate([
-            'app_logo' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'app_logo' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:3072'],
         ], [
             'app_logo.required' => 'Pilih file logo terlebih dahulu.',
             'app_logo.image' => 'File harus berupa gambar.',
             'app_logo.mimes' => 'Format logo harus PNG, JPG, JPEG, atau WEBP.',
-            'app_logo.max' => 'Ukuran logo maksimal 5 MB.',
+            'app_logo.max' => 'Ukuran logo maksimal 3 MB.',
         ]);
 
         // Hapus logo lama jika ada

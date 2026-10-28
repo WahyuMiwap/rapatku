@@ -260,9 +260,9 @@
           @csrf
           <div>
             <label class="text-xs font-bold text-[#0F2F5B] block mb-1">Unggah Logo Baru</label>
-            <input type="file" name="app_logo" accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml" required
+            <input type="file" name="app_logo" accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml" required onchange="validateFileSize(this, 3)"
                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#EAF0FA] file:text-[#0F2F5B] hover:file:bg-[#d8e3f5] file:cursor-pointer border border-slate-200 rounded-xl p-1 bg-white">
-            <p class="text-[10px] text-slate-400 mt-1">Disarankan format PNG transparan atau SVG/JPG, rasio persegi (1:1), resolusi minimal 512x512 px, maksimal 5 MB.</p>
+            <p class="text-[10px] text-slate-400 mt-1">Disarankan format PNG transparan atau SVG/JPG, rasio persegi (1:1), resolusi minimal 512x512 px, maksimal 3 MB.</p>
           </div>
           <button type="submit" class="btn-bnn !py-2 text-xs">
             Simpan Logo Aplikasi
@@ -325,9 +325,9 @@
           @csrf
           <div>
             <label class="text-xs font-bold text-[#0F2F5B] block mb-1">Pilih Gambar Background Baru</label>
-            <input type="file" name="login_bg" accept="image/jpeg,image/png,image/jpg,image/webp" required
+            <input type="file" name="login_bg" accept="image/jpeg,image/png,image/jpg,image/webp" required onchange="validateFileSize(this, 3)"
                    class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#EAF0FA] file:text-[#0F2F5B] hover:file:bg-[#d8e3f5] file:cursor-pointer border border-slate-200 rounded-xl p-1 bg-white">
-            <p class="text-[10px] text-slate-400 mt-1">Disarankan resolusi minimal 1920x1080 px (Landscape), format JPG/PNG/WEBP, maksimal 5 MB.</p>
+            <p class="text-[10px] text-slate-400 mt-1">Disarankan resolusi minimal 1920x1080 px (Landscape), format JPG/PNG/WEBP, maksimal 3 MB.</p>
           </div>
           <button type="submit" class="btn-bnn !py-2 text-xs">
             Simpan Gambar Background
@@ -510,6 +510,18 @@ function openEditSignatoryModal(signatory) {
   document.getElementById('editSignatoryNomor').value = signatory.nomor_identitas || '';
   document.getElementById('editSignatoryActive').value = signatory.is_active ? '1' : '0';
   modal.showModal();
+}
+
+function validateFileSize(input, maxMb) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const maxBytes = maxMb * 1024 * 1024;
+    if (file.size > maxBytes) {
+      const actualMb = (file.size / (1024 * 1024)).toFixed(1);
+      alert('Ukuran file (' + actualMb + ' MB) melebihi batas maksimal ' + maxMb + ' MB. Silakan pilih file lain yang berukuran lebih kecil.');
+      input.value = '';
+    }
+  }
 }
 </script>
 @endpush
