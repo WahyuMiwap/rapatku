@@ -298,20 +298,19 @@
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        <span>Mencari rekomendasi...</span>
+        <span>Mencari...</span>
       </div>
     `;
   }
 
   function renderSuggestions(data, query) {
     if (!suggestionsDropdown) return;
-    const hasEvents = data.events && data.events.length > 0;
-    const hasCategories = data.categories && data.categories.length > 0;
+    const events = data.events || [];
 
-    if (!hasEvents && !hasCategories) {
+    if (events.length === 0) {
       suggestionsDropdown.innerHTML = `
         <div class="p-4 text-center">
-          <div class="text-xs font-semibold text-slate-600">Tidak ada rapat atau kategori yang cocok</div>
+          <div class="text-xs font-semibold text-slate-600">Tidak ada judul rapat yang cocok</div>
           <div class="text-[11px] text-slate-400 mt-1">Tekan <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">Enter</kbd> untuk mencari di seluruh tabel</div>
         </div>
       `;
@@ -320,46 +319,26 @@
     }
 
     let html = '<div class="p-1.5 space-y-1 max-h-80 overflow-y-auto">';
+    html += '<div class="px-2.5 pt-1.5 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Judul Rapat</div>';
 
-    // 1. Kategori yang cocok
-    if (hasCategories) {
-      html += '<div class="px-2.5 pt-1.5 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategori / Bidang</div>';
-      data.categories.forEach(cat => {
-        const catEsc = escapeHtml(cat);
-        html += `
-          <button type="button" onclick="selectCategorySuggestion('${catEsc.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-between group transition">
-            <div class="flex items-center gap-2 truncate pr-2">
-              <span class="w-5 h-5 rounded-md bg-blue-100 text-[#174A9E] flex items-center justify-center text-[10px] shrink-0">📁</span>
-              <span class="font-bold truncate">${highlightMatch(cat, query)}</span>
-            </div>
-            <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-medium shrink-0">Filter</span>
-          </button>
-        `;
-      });
-    }
+    events.forEach(evt => {
+      const statusBadge = evt.is_active
+        ? '<span class="text-green-700 bg-green-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Aktif</span>'
+        : '<span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Selesai</span>';
 
-    // 2. Judul Rapat yang cocok
-    if (hasEvents) {
-      html += '<div class="px-2.5 pt-2 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rapat Ditemukan</div>';
-      data.events.forEach(evt => {
-        const statusBadge = evt.is_active
-          ? '<span class="text-green-700 bg-green-100 px-1.5 py-0.5 rounded text-[9px] font-bold">Aktif</span>'
-          : '<span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[9px] font-bold">Selesai</span>';
-
-        html += `
-          <a href="${evt.url}" class="block px-3 py-2 hover:bg-[#EAF0FA] rounded-xl transition group">
-            <div class="flex items-start justify-between gap-2">
-              <span class="font-bold text-xs text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate">${highlightMatch(evt.title, query)}</span>
-              ${statusBadge}
-            </div>
-            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
-              <span>${evt.date}</span>
-              ${evt.category ? `<span>•</span><span class="text-slate-500">${highlightMatch(evt.category, query)}</span>` : ''}
-            </div>
-          </a>
-        `;
-      });
-    }
+      html += `
+        <a href="${evt.url}" class="block px-3 py-2 hover:bg-[#EAF0FA] rounded-xl transition group">
+          <div class="flex items-start justify-between gap-2">
+            <span class="font-bold text-xs text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate">${highlightMatch(evt.title, query)}</span>
+            ${statusBadge}
+          </div>
+          <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+            <span>${evt.date}</span>
+            ${evt.category ? `<span>•</span><span class="text-slate-500">${escapeHtml(evt.category)}</span>` : ''}
+          </div>
+        </a>
+      `;
+    });
 
     html += '</div>';
 
@@ -395,7 +374,7 @@
       return;
     }
 
-    // Debounce 220ms sebelum request rekomendasi
+    // Debounce cepat 140ms
     debounceTimer = setTimeout(() => {
       // Batalkan request sebelumnya agar bebas race condition
       if (abortController) {
@@ -420,7 +399,7 @@
           console.error('Error fetching suggestions:', err);
         }
       });
-    }, 220);
+    }, 140);
   }
 
   if (searchInput) {

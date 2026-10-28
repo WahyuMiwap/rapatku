@@ -55,7 +55,7 @@ class AdminEventController extends Controller
         return redirect()->route('admin.dashboard', $request->query());
     }
 
-    /** Rekomendasi autocomplete pencarian judul rapat dan kategori secara realtime (non-blocking). */
+    /** Rekomendasi pencarian judul rapat secara realtime (ringan, cepat, & non-blocking). */
     public function suggestions(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
@@ -63,17 +63,14 @@ class AdminEventController extends Controller
             return response()->json([
                 'query' => '',
                 'events' => [],
-                'categories' => [],
             ]);
         }
 
         $escapedQ = addcslashes($q, '%_\\');
 
-        $events = Event::select('id', 'title', 'slug', 'category', 'event_date', 'is_active')
-            ->where(function ($w) use ($escapedQ) {
-                $w->where('title', 'like', "%{$escapedQ}%")
-                    ->orWhere('category', 'like', "%{$escapedQ}%");
-            })
+        // Cari langsung pada kolom title (judul rapat)
+        $events = Event::select('id', 'uuid', 'title', 'category', 'event_date', 'is_active')
+            ->where('title', 'like', "%{$escapedQ}%")
             ->orderByDesc('id')
             ->limit(5)
             ->get()
@@ -88,14 +85,9 @@ class AdminEventController extends Controller
                 ];
             });
 
-        $categories = Category::where('name', 'like', "%{$escapedQ}%")
-            ->limit(3)
-            ->pluck('name');
-
         return response()->json([
             'query' => $q,
             'events' => $events,
-            'categories' => $categories,
         ]);
     }
 
