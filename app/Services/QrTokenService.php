@@ -88,11 +88,19 @@ class QrTokenService
      */
     public function qrUrl(Event $event, string $token): string
     {
+        // 1. Jika request saat ini berasal dari domain publik / tunnel (seperti ngrok, cloudflare, atau domain hosting)
+        $host = request()->getHost();
+        if ($host && ! in_array($host, ['localhost', '127.0.0.1']) && ! filter_var($host, FILTER_VALIDATE_IP)) {
+            return request()->getSchemeAndHttpHost() . '/absen/' . $event->slug . '?t=' . $token;
+        }
+
+        // 2. Jika APP_URL di .env disetel ke domain/IP publik tertentu
         $appUrl = rtrim((string) config('app.url'), '/');
         if ($appUrl && ! str_contains($appUrl, 'localhost') && ! str_contains($appUrl, '127.0.0.1')) {
             return $appUrl . '/absen/' . $event->slug . '?t=' . $token;
         }
 
+        // 3. Fallback jika dibuka dari IP lokal di jaringan WiFi
         $localIp = gethostbyname(gethostname());
         $port = request()->getPort() ? ':' . request()->getPort() : ':8000';
         if ($localIp && $localIp !== '127.0.0.1') {
