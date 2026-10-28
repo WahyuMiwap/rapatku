@@ -55,6 +55,50 @@ class AdminEventController extends Controller
         return redirect()->route('admin.dashboard', $request->query());
     }
 
+    /** Rekomendasi autocomplete pencarian judul rapat dan kategori secara realtime (non-blocking). */
+    public function suggestions(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        if (mb_strlen($q) < 1) {
+            return response()->json([
+                'query' => '',
+                'events' => [],
+                'categories' => [],
+            ]);
+        }
+
+        $escapedQ = addcslashes($q, '%_\\');
+
+        $events = Event::select('id', 'title', 'slug', 'category', 'event_date', 'is_active')
+            ->where(function ($w) use ($escapedQ) {
+                $w->where('title', 'like', "%{$escapedQ}%")
+                    ->orWhere('category', 'like', "%{$escapedQ}%");
+            })
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'category' => $event->category,
+                    'date' => $event->event_date ? $event->event_date->format('d M Y') : '',
+                    'is_active' => (bool) $event->is_active,
+                    'url' => route('admin.events.show', $event),
+                ];
+            });
+
+        $categories = Category::where('name', 'like', "%{$escapedQ}%")
+            ->limit(3)
+            ->pluck('name');
+
+        return response()->json([
+            'query' => $q,
+            'events' => $events,
+            'categories' => $categories,
+        ]);
+    }
+
     /** Level 3 — Detail per event: info + daftar peserta inline. */
     public function show(Request $request, Event $event)
     {

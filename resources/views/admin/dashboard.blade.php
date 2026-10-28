@@ -134,7 +134,7 @@
         <p class="text-xs text-slate-400 mt-0.5">Kelola seluruh rapat, presensi, dan status pelaksanaan</p>
       </div>
       <form id="filterRapatForm" method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap items-center gap-2">
-        <div class="relative">
+        <div class="relative" id="searchContainer">
           <input id="inputSearchRapat"
                  type="text"
                  name="q"
@@ -142,12 +142,17 @@
                  placeholder="Cari nama rapat / kategori..."
                  class="input-bnn !py-2 text-xs w-48 sm:w-64 pr-8"
                  autocomplete="off">
-          @if($q)
-            <button type="button"
-                    onclick="clearSearch()"
-                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm font-bold leading-none p-1 cursor-pointer"
-                    title="Hapus pencarian">&times;</button>
-          @endif
+          <button type="button"
+                  id="btnClearSearch"
+                  onclick="clearSearch()"
+                  style="{{ $q ? '' : 'display: none;' }}"
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-sm font-bold leading-none p-1 cursor-pointer"
+                  title="Hapus pencarian">&times;</button>
+
+          {{-- DROPDOWN REKOMENDASI PENCARIAN REALTIME --}}
+          <div id="searchSuggestionsDropdown"
+               class="hidden absolute left-0 top-full mt-1.5 w-72 sm:w-84 max-w-[90vw] bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 text-left transition">
+          </div>
         </div>
         <select id="selectStatusRapat"
                 name="status"
@@ -253,33 +258,214 @@
     real.classList.remove('opacity-0');
   }
 
-  // Auto-Search saat mengetik judul/kategori (Debounce 400ms)
+  // Autocomplete Rekomendasi Pencarian Realtime (Non-blocking & Cegah Race Condition)
   const searchInput = document.getElementById('inputSearchRapat');
+  const searchContainer = document.getElementById('searchContainer');
+  const suggestionsDropdown = document.getElementById('searchSuggestionsDropdown');
+  const btnClear = document.getElementById('btnClearSearch');
   const filterForm = document.getElementById('filterRapatForm');
-  let searchTimer;
 
-  if (searchInput && filterForm) {
-    searchInput.addEventListener('input', function() {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        filterForm.submit();
-      }, 400);
-    });
+  let abortController = null;
+  let debounceTimer = null;
 
-    // Jika sedang dalam mode pencarian, kembalikan kursor ke ujung input
-    if (@json($q)) {
-      searchInput.focus();
-      const val = searchInput.value;
-      searchInput.value = '';
-      searchInput.value = val;
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function highlightMatch(text, query) {
+    if (!text || !query) return escapeHtml(text);
+    const escaped = escapeHtml(text);
+    const safeQ = query.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    if (!safeQ) return escaped;
+    const regex = new RegExp('(' + safeQ + ')', 'gi');
+    return escaped.replace(regex, '<span class="text-[#174A9E] bg-blue-100/70 px-0.5 rounded font-extrabold">$1</span>');
+  }
+
+  function hideDropdown() {
+    if (suggestionsDropdown) {
+      suggestionsDropdown.classList.add('hidden');
+      suggestionsDropdown.innerHTML = '';
     }
   }
 
+  function showLoading(query) {
+    if (!suggestionsDropdown) return;
+    suggestionsDropdown.classList.remove('hidden');
+    suggestionsDropdown.innerHTML = `
+      <div class="p-3 text-center flex items-center justify-center gap-2 text-xs text-slate-400">
+        <svg class="animate-spin h-3.5 w-3.5 text-[#174A9E]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>Mencari rekomendasi...</span>
+      </div>
+    `;
+  }
+
+  function renderSuggestions(data, query) {
+    if (!suggestionsDropdown) return;
+    const hasEvents = data.events && data.events.length > 0;
+    const hasCategories = data.categories && data.categories.length > 0;
+
+    if (!hasEvents && !hasCategories) {
+      suggestionsDropdown.innerHTML = `
+        <div class="p-4 text-center">
+          <div class="text-xs font-semibold text-slate-600">Tidak ada rapat atau kategori yang cocok</div>
+          <div class="text-[11px] text-slate-400 mt-1">Tekan <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono">Enter</kbd> untuk mencari di seluruh tabel</div>
+        </div>
+      `;
+      suggestionsDropdown.classList.remove('hidden');
+      return;
+    }
+
+    let html = '<div class="p-1.5 space-y-1 max-h-80 overflow-y-auto">';
+
+    // 1. Kategori yang cocok
+    if (hasCategories) {
+      html += '<div class="px-2.5 pt-1.5 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategori / Bidang</div>';
+      data.categories.forEach(cat => {
+        const catEsc = escapeHtml(cat);
+        html += `
+          <button type="button" onclick="selectCategorySuggestion('${catEsc.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-between group transition">
+            <div class="flex items-center gap-2 truncate pr-2">
+              <span class="w-5 h-5 rounded-md bg-blue-100 text-[#174A9E] flex items-center justify-center text-[10px] shrink-0">📁</span>
+              <span class="font-bold truncate">${highlightMatch(cat, query)}</span>
+            </div>
+            <span class="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-medium shrink-0">Filter</span>
+          </button>
+        `;
+      });
+    }
+
+    // 2. Judul Rapat yang cocok
+    if (hasEvents) {
+      html += '<div class="px-2.5 pt-2 pb-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Rapat Ditemukan</div>';
+      data.events.forEach(evt => {
+        const statusBadge = evt.is_active
+          ? '<span class="text-green-700 bg-green-100 px-1.5 py-0.5 rounded text-[9px] font-bold">Aktif</span>'
+          : '<span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[9px] font-bold">Selesai</span>';
+
+        html += `
+          <a href="${evt.url}" class="block px-3 py-2 hover:bg-[#EAF0FA] rounded-xl transition group">
+            <div class="flex items-start justify-between gap-2">
+              <span class="font-bold text-xs text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate">${highlightMatch(evt.title, query)}</span>
+              ${statusBadge}
+            </div>
+            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+              <span>${evt.date}</span>
+              ${evt.category ? `<span>•</span><span class="text-slate-500">${highlightMatch(evt.category, query)}</span>` : ''}
+            </div>
+          </a>
+        `;
+      });
+    }
+
+    html += '</div>';
+
+    // Footer: Tombol cari di seluruh tabel
+    html += `
+      <div class="p-1.5 border-t border-slate-100 bg-slate-50/60">
+        <button type="submit" form="filterRapatForm" class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#174A9E] hover:bg-white flex items-center gap-2 transition">
+          <svg class="w-3.5 h-3.5 shrink-0 text-[#174A9E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="truncate">Tampilkan semua hasil "<strong>${escapeHtml(query)}</strong>" di tabel &rarr;</span>
+        </button>
+      </div>
+    `;
+
+    suggestionsDropdown.innerHTML = html;
+    suggestionsDropdown.classList.remove('hidden');
+  }
+
+  function handleSearchInput() {
+    const query = searchInput.value.trim();
+
+    if (btnClear) {
+      btnClear.style.display = searchInput.value ? '' : 'none';
+    }
+
+    clearTimeout(debounceTimer);
+
+    if (query.length === 0) {
+      hideDropdown();
+      if (abortController) {
+        abortController.abort();
+        abortController = null;
+      }
+      return;
+    }
+
+    // Debounce 220ms sebelum request rekomendasi
+    debounceTimer = setTimeout(() => {
+      // Batalkan request sebelumnya agar bebas race condition
+      if (abortController) {
+        abortController.abort();
+      }
+      abortController = new AbortController();
+
+      showLoading(query);
+
+      fetch(`/admin/events/suggestions?q=${encodeURIComponent(query)}`, {
+        signal: abortController.signal
+      })
+      .then(res => res.json())
+      .then(data => {
+        // Hanya render jika query masih sama dengan teks input terkini
+        if (searchInput.value.trim() === data.query) {
+          renderSuggestions(data, query);
+        }
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching suggestions:', err);
+        }
+      });
+    }, 220);
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', handleSearchInput);
+
+    searchInput.addEventListener('focus', function() {
+      if (this.value.trim().length > 0 && suggestionsDropdown && suggestionsDropdown.innerHTML.trim() !== '') {
+        suggestionsDropdown.classList.remove('hidden');
+      }
+    });
+
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        hideDropdown();
+      }
+    });
+  }
+
+  // Tutup dropdown jika klik di luar area search
+  document.addEventListener('click', function(e) {
+    if (searchContainer && !searchContainer.contains(e.target)) {
+      hideDropdown();
+    }
+  });
+
+  window.selectCategorySuggestion = function(categoryName) {
+    if (searchInput) {
+      searchInput.value = categoryName;
+    }
+    hideDropdown();
+    if (filterForm) {
+      filterForm.submit();
+    }
+  };
+
   window.clearSearch = function() {
-    const input = document.getElementById('inputSearchRapat');
-    if (input) {
-      input.value = '';
-      document.getElementById('filterRapatForm').submit();
+    if (searchInput) {
+      searchInput.value = '';
+    }
+    if (btnClear) {
+      btnClear.style.display = 'none';
+    }
+    hideDropdown();
+    if (filterForm) {
+      filterForm.submit();
     }
   };
 })();

@@ -27,6 +27,7 @@ Route::get('/absen/{slug}/sukses', [AttendanceController::class, 'success'])->na
 // Admin (auth)
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminEventController::class, 'dashboard'])->name('dashboard');
+    Route::get('/events/suggestions', [AdminEventController::class, 'suggestions'])->name('events.suggestions');
     Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
     Route::post('/events', [AdminEventController::class, 'store'])->name('events.store');
     Route::patch('/events/{event}/toggle', [AdminEventController::class, 'toggle'])->name('events.toggle');
