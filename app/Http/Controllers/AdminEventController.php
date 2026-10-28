@@ -650,8 +650,51 @@ class AdminEventController extends Controller
             }
         }
 
-        $ext = $request->file('app_logo')->extension() ?: 'png';
-        $request->file('app_logo')->storeAs('settings', 'app_logo.' . $ext, 'public');
+        $uploaded = $request->file('app_logo');
+        $ext = 'png';
+        $targetRelative = 'settings/app_logo.' . $ext;
+        $savedWithGd = false;
+
+        if (extension_loaded('gd')) {
+            try {
+                $raw = file_get_contents($uploaded->getRealPath());
+                $src = @imagecreatefromstring($raw);
+                if ($src) {
+                    $w = imagesx($src);
+                    $h = imagesy($src);
+                    $max = 320;
+                    if ($w > $max || $h > $max) {
+                        $ratio = min($max / $w, $max / $h);
+                        $nw = (int)round($w * $ratio);
+                        $nh = (int)round($h * $ratio);
+                    } else {
+                        $nw = $w;
+                        $nh = $h;
+                    }
+
+                    $dst = imagecreatetruecolor($nw, $nh);
+                    imagealphablending($dst, false);
+                    imagesavealpha($dst, true);
+                    $transparent = imagecolorallocatealpha($dst, 255, 255, 255, 127);
+                    imagefilledrectangle($dst, 0, 0, $nw, $nh, $transparent);
+                    imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+
+                    ob_start();
+                    imagepng($dst, null, 9);
+                    $optimizedData = ob_get_clean();
+
+                    Storage::disk('public')->put($targetRelative, $optimizedData);
+                    $savedWithGd = true;
+                }
+            } catch (\Throwable $e) {
+                $savedWithGd = false;
+            }
+        }
+
+        if (!$savedWithGd) {
+            $ext = $uploaded->extension() ?: 'png';
+            $uploaded->storeAs('settings', 'app_logo.' . $ext, 'public');
+        }
 
         return redirect()->to(route('admin.settings.index') . '#logo')->with('ok', 'Logo aplikasi berhasil diperbarui.');
     }

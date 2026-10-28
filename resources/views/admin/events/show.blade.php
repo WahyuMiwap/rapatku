@@ -126,7 +126,7 @@
              data-delete-url="{{ route('admin.events.photos.destroy', [$event, $photo]) }}"
              onclick="previewPhoto(this.dataset.url, this.dataset.name, this.dataset.deleteUrl)"
              title="Klik untuk melihat foto lebih besar">
-          <img src="{{ $photo->url }}" alt="{{ $photo->original_name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+          <img src="{{ $photo->url }}" alt="{{ $photo->original_name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
           
           {{-- Tombol Hapus Cepat di Pojok Kanan Atas Foto --}}
           <form method="POST" action="{{ route('admin.events.photos.destroy', [$event, $photo]) }}"
@@ -240,7 +240,7 @@
             <td class="px-3 py-3 text-xs tabular text-slate-400">{{ $a->created_at?->format('d/m H:i') }}</td>
             <td class="px-3 py-3">
               <a href="{{ route('admin.attendees.signature', $a) }}" target="_blank" title="Lihat Tanda Tangan Penuh">
-                <img src="{{ route('admin.attendees.signature', $a) }}" alt="TTD"
+                <img src="{{ route('admin.attendees.signature', $a) }}" alt="TTD" loading="lazy"
                      class="h-8 max-w-[90px] object-contain border border-slate-200 rounded-lg bg-white px-1 hover:opacity-80 transition shadow-2xs">
               </a>
             </td>
