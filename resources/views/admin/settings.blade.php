@@ -256,7 +256,7 @@
 
       {{-- Form Upload & Reset --}}
       <div class="md:col-span-7 space-y-4">
-        <form method="POST" action="{{ route('admin.settings.logo.update') }}" enctype="multipart/form-data" class="space-y-3">
+        <form method="POST" action="{{ route('admin.settings.logo.update') }}" enctype="multipart/form-data" class="space-y-3" onsubmit="return handleSingleSubmit(this, 'Menyimpan Logo...')">
           @csrf
           <div>
             <label class="text-xs font-bold text-[#0F2F5B] block mb-1">Unggah Logo Baru</label>
@@ -321,7 +321,7 @@
 
       {{-- Form Upload & Reset --}}
       <div class="md:col-span-7 space-y-4">
-        <form method="POST" action="{{ route('admin.settings.login-background.update') }}" enctype="multipart/form-data" class="space-y-3">
+        <form method="POST" action="{{ route('admin.settings.login-background.update') }}" enctype="multipart/form-data" class="space-y-3" onsubmit="return handleSingleSubmit(this, 'Menyimpan Background...')">
           @csrf
           <div>
             <label class="text-xs font-bold text-[#0F2F5B] block mb-1">Pilih Gambar Background Baru</label>
@@ -522,6 +522,20 @@ function validateFileSize(input, maxMb) {
       input.value = '';
     }
   }
+}
+
+function handleSingleSubmit(form, loadingText) {
+  if (form.dataset.submitting === 'true') {
+    return false;
+  }
+  form.dataset.submitting = 'true';
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+    if (loadingText) btn.textContent = loadingText;
+    setTimeout(() => { btn.disabled = true; }, 10);
+  }
+  return true;
 }
 </script>
 @endpush

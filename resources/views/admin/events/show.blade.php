@@ -282,9 +282,9 @@
       <h3 class="font-bold text-base text-[#0F2F5B]">Upload Foto Dokumentasi</h3>
       <p class="text-xs text-slate-400 mt-0.5">Slot foto ke-{{ $photos->count() + 1 }} dari 5</p>
     </div>
-    <button onclick="document.getElementById('modalUploadPhoto').close()" type="button" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none p-1">&times;</button>
+    <button id="btnCloseUploadModal" onclick="closeUploadPhotoModal()" type="button" class="text-slate-400 hover:text-slate-700 text-xl font-bold leading-none p-1 transition">&times;</button>
   </div>
-  <form method="POST" action="{{ route('admin.events.photos.store', $event) }}" enctype="multipart/form-data" class="mt-4 space-y-4">
+  <form id="formUploadPhoto" method="POST" action="{{ route('admin.events.photos.store', $event) }}" enctype="multipart/form-data" class="mt-4 space-y-4" onsubmit="return handlePhotoSubmit(event)">
     @csrf
     <div>
       <label class="block text-xs font-bold text-[#0F2F5B] mb-1.5">Pilih Foto Rapat</label>
@@ -306,8 +306,14 @@
       </div>
     </div>
     <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
-      <button type="button" onclick="document.getElementById('modalUploadPhoto').close()" class="btn-soft !py-2 text-xs">Batal</button>
-      <button type="submit" id="btnSubmitPhoto" class="btn-bnn !py-2 text-xs">Unggah Foto</button>
+      <button type="button" id="btnCancelPhoto" onclick="closeUploadPhotoModal()" class="btn-soft !py-2 text-xs transition">Batal</button>
+      <button type="submit" id="btnSubmitPhoto" class="btn-bnn !py-2 text-xs inline-flex items-center justify-center gap-2 transition">
+        <svg id="photoSpinner" class="hidden animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span id="photoBtnText">Unggah Foto</span>
+      </button>
     </div>
   </form>
 </dialog>
@@ -409,9 +415,63 @@
 
 @push('scripts')
 <script>
+let isPhotoSubmitting = false;
+
 function openUploadPhotoModal() {
   resetPhotoSelect();
   document.getElementById('modalUploadPhoto').showModal();
+}
+
+function closeUploadPhotoModal() {
+  if (isPhotoSubmitting) return;
+  document.getElementById('modalUploadPhoto').close();
+}
+
+function handlePhotoSubmit(e) {
+  const fileInput = document.getElementById('inputPhotoFile');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    e.preventDefault();
+    alert('Silakan pilih berkas foto terlebih dahulu.');
+    return false;
+  }
+
+  // Jika sedang proses pengunggahan, cegah pengiriman ganda
+  if (isPhotoSubmitting) {
+    e.preventDefault();
+    return false;
+  }
+
+  isPhotoSubmitting = true;
+
+  const btnSubmit = document.getElementById('btnSubmitPhoto');
+  const btnCancel = document.getElementById('btnCancelPhoto');
+  const spinner = document.getElementById('photoSpinner');
+  const btnText = document.getElementById('photoBtnText');
+  const closeBtn = document.getElementById('btnCloseUploadModal');
+  const dropArea = document.getElementById('photoDropArea');
+
+  // Berikan indikator visual dan nonaktifkan klik
+  btnSubmit.classList.add('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+  if (spinner) spinner.classList.remove('hidden');
+  if (btnText) btnText.textContent = 'Mengunggah...';
+
+  if (btnCancel) {
+    btnCancel.classList.add('pointer-events-none', 'opacity-50');
+  }
+  if (closeBtn) {
+    closeBtn.classList.add('pointer-events-none', 'opacity-50');
+  }
+  if (dropArea) {
+    dropArea.classList.add('pointer-events-none', 'opacity-60');
+  }
+
+  // Disable button di tick berikutnya agar tidak membatalkan submit native browser
+  setTimeout(() => {
+    btnSubmit.disabled = true;
+    if (btnCancel) btnCancel.disabled = true;
+  }, 10);
+
+  return true;
 }
 
 function handlePhotoSelect(input) {
@@ -436,12 +496,49 @@ function handlePhotoSelect(input) {
 }
 
 function resetPhotoSelect() {
-  document.getElementById('inputPhotoFile').value = '';
+  isPhotoSubmitting = false;
+  const btnSubmit = document.getElementById('btnSubmitPhoto');
+  const btnCancel = document.getElementById('btnCancelPhoto');
+  const spinner = document.getElementById('photoSpinner');
+  const btnText = document.getElementById('photoBtnText');
+  const closeBtn = document.getElementById('btnCloseUploadModal');
+  const dropArea = document.getElementById('photoDropArea');
+
+  if (btnSubmit) {
+    btnSubmit.disabled = false;
+    btnSubmit.classList.remove('opacity-75', 'cursor-not-allowed', 'pointer-events-none');
+  }
+  if (btnCancel) {
+    btnCancel.disabled = false;
+    btnCancel.classList.remove('pointer-events-none', 'opacity-50');
+  }
+  if (closeBtn) {
+    closeBtn.classList.remove('pointer-events-none', 'opacity-50');
+  }
+  if (dropArea) {
+    dropArea.classList.remove('pointer-events-none', 'opacity-60');
+  }
+  if (spinner) spinner.classList.add('hidden');
+  if (btnText) btnText.textContent = 'Unggah Foto';
+
+  const fileInput = document.getElementById('inputPhotoFile');
+  if (fileInput) fileInput.value = '';
   document.getElementById('photoPreviewImg').src = '';
   document.getElementById('photoPreviewName').textContent = '';
   document.getElementById('photoPlaceholder').classList.remove('hidden');
   document.getElementById('photoPreviewWrap').classList.add('hidden');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const modalUpload = document.getElementById('modalUploadPhoto');
+  if (modalUpload) {
+    modalUpload.addEventListener('cancel', function(e) {
+      if (isPhotoSubmitting) {
+        e.preventDefault();
+      }
+    });
+  }
+});
 
 function previewPhoto(url, title, deleteUrl) {
   document.getElementById('previewFullImg').src = url;
