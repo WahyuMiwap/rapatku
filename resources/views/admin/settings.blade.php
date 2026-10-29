@@ -424,40 +424,6 @@
     </div>
   </section>
   @endif
-
-  {{-- Card 5: Konfigurasi Sistem Rapatku (Informasi teknis) --}}
-  <section class="card p-5 md:col-span-2">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">⚙</div>
-      <div>
-        <h3 class="font-bold text-[#0F2F5B]">Konfigurasi Sistem Absensi</h3>
-        <p class="text-xs text-slate-400">Parameter keamanan dan privasi absensi rapat</p>
-      </div>
-    </div>
-
-    <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-      <div class="p-3 bg-[#EDF2F9] rounded-xl">
-        <div class="text-slate-500 font-semibold">Rotasi Token QR</div>
-        <div class="text-base font-extrabold text-[#0F2F5B] tabular mt-1">15 Detik</div>
-        <div class="text-[10px] text-slate-400 mt-0.5">Token acak dinamis anti-titip absen</div>
-      </div>
-      <div class="p-3 bg-[#EDF2F9] rounded-xl">
-        <div class="text-slate-500 font-semibold">Toleransi Sesi Pengisian</div>
-        <div class="text-base font-extrabold text-[#0F2F5B] tabular mt-1">20 Menit</div>
-        <div class="text-[10px] text-slate-400 mt-0.5">Masa isi form setelah berhasil scan</div>
-      </div>
-      <div class="p-3 bg-[#EDF2F9] rounded-xl">
-        <div class="text-slate-500 font-semibold">Privasi Tanda Tangan</div>
-        <div class="text-base font-extrabold text-[#0F2F5B] mt-1">Private Storage</div>
-        <div class="text-[10px] text-slate-400 mt-0.5">Hanya dapat diakses akun admin</div>
-      </div>
-      <div class="p-3 bg-[#EDF2F9] rounded-xl">
-        <div class="text-slate-500 font-semibold">Rate Limiter Ruangan</div>
-        <div class="text-base font-extrabold text-[#0F2F5B] tabular mt-1">150 / 3 Menit</div>
-        <div class="text-[10px] text-slate-400 mt-0.5">150 req IP WiFi, 3 req no. telp</div>
-      </div>
-    </div>
-  </section>
 </div>
 
 {{-- Modal Edit Nama Kategori --}}
