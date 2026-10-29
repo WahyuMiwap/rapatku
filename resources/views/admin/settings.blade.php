@@ -9,12 +9,9 @@
 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
   {{-- Card 1: Ganti Password --}}
   <section class="card p-5">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">🔒</div>
-      <div>
-        <h3 class="font-bold text-[#0F2F5B]">Keamanan & Password</h3>
-        <p class="text-xs text-slate-400">Ubah password akun admin panitia</p>
-      </div>
+    <div>
+      <h3 class="font-bold text-[#0F2F5B]">Keamanan & Password</h3>
+      <p class="text-xs text-slate-400">Ubah password akun admin panitia</p>
     </div>
 
     <form method="POST" action="{{ route('admin.settings.password') }}" class="mt-4 space-y-3">
@@ -38,12 +35,9 @@
   {{-- Card 2: Profil Admin --}}
   <section class="card p-5 flex flex-col justify-between">
     <div>
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">👤</div>
-        <div>
-          <h3 class="font-bold text-[#0F2F5B]">Profil Pengguna</h3>
-          <p class="text-xs text-slate-400">Informasi identitas admin panitia</p>
-        </div>
+      <div>
+        <h3 class="font-bold text-[#0F2F5B]">Profil Pengguna</h3>
+        <p class="text-xs text-slate-400">Informasi identitas admin panitia</p>
       </div>
 
       <form method="POST" action="{{ route('admin.settings.profile') }}" class="mt-4 space-y-3">
@@ -71,16 +65,9 @@
   {{-- Card: Manajemen Akun Administrator (KHUSUS SUPERADMIN) --}}
   <section class="card p-5 md:col-span-2" id="users">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm shadow-xs border border-blue-200/50">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        </div>
-        <div>
-          <h3 class="font-bold text-[#0F2F5B]">Manajemen Akun Administrator</h3>
-          <p class="text-xs text-slate-400">Kelola daftar pengguna panitia, hak akses, dan atur password akun</p>
-        </div>
+      <div>
+        <h3 class="font-bold text-[#0F2F5B]">Manajemen Akun Administrator</h3>
+        <p class="text-xs text-slate-400">Kelola daftar pengguna panitia, hak akses, dan atur password akun</p>
       </div>
       <button type="button" onclick="openAddUserModal()" class="btn-bnn !py-2 text-xs shrink-0 inline-flex items-center gap-1.5 cursor-pointer">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -175,12 +162,9 @@
   {{-- Card 3: Kelola Kategori / Bidang Rapat --}}
   <section class="card p-5 md:col-span-2">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">🏷️</div>
-        <div>
-          <h3 class="font-bold text-[#0F2F5B]">Daftar Kategori / Bidang Rapat</h3>
-          <p class="text-xs text-slate-400">Pilihan kategori yang tampil pada formulir pembuatan rapat baru</p>
-        </div>
+      <div>
+        <h3 class="font-bold text-[#0F2F5B]">Daftar Kategori / Bidang Rapat</h3>
+        <p class="text-xs text-slate-400">Pilihan kategori yang tampil pada formulir pembuatan rapat baru</p>
       </div>
       {{-- Form Tambah Cepat --}}
       <form method="POST" action="{{ route('admin.settings.categories.store') }}" class="flex gap-2">
@@ -227,16 +211,9 @@
   {{-- Card: Kelola Master Data Penandatangan Laporan --}}
   <section class="card p-5 md:col-span-2" id="penandatangan">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">
-          <svg class="w-4 h-4 text-[#0F2F5B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </div>
-        <div>
-          <h3 class="font-bold text-[#0F2F5B]">Master Data Penandatangan Laporan</h3>
-          <p class="text-xs text-slate-400">Daftar pejabat penandatangan yang tampil pada pilihan rekapitulasi laporan rapat</p>
-        </div>
+      <div>
+        <h3 class="font-bold text-[#0F2F5B]">Master Data Penandatangan Laporan</h3>
+        <p class="text-xs text-slate-400">Daftar pejabat penandatangan yang tampil pada pilihan rekapitulasi laporan rapat</p>
       </div>
       <button type="button" onclick="openAddSignatoryModal()" class="btn-bnn !py-2 text-xs shrink-0 inline-flex items-center gap-1.5">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -322,16 +299,9 @@
 
   {{-- Card: Kustomisasi Logo Utama Aplikasi & Dokumen (Web & APK Icon) --}}
   <section class="card p-5 md:col-span-2" id="logo">
-    <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
-      <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">
-        <svg class="w-4 h-4 text-[#0F2F5B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div>
-        <h3 class="font-bold text-[#0F2F5B]">Logo Aplikasi (Web & APK Icon)</h3>
-        <p class="text-xs text-slate-400">Atur logo utama yang digunakan untuk antarmuka web, sidebar admin, halaman login, serta ikon aplikasi (APK/PWA/Favicon).</p>
-      </div>
+    <div class="pb-3 border-b border-slate-100">
+      <h3 class="font-bold text-[#0F2F5B]">Logo Aplikasi (Web & APK Icon)</h3>
+      <p class="text-xs text-slate-400">Atur logo utama yang digunakan untuk antarmuka web, sidebar admin, halaman login, serta ikon aplikasi (APK/PWA/Favicon).</p>
     </div>
 
     <div class="mt-4 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -394,12 +364,9 @@
 
   {{-- Card 4: Kustomisasi Gambar Banner Login --}}
   <section class="card p-5 md:col-span-2">
-    <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
-      <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm">🖼️</div>
-      <div>
-        <h3 class="font-bold text-[#0F2F5B]">Gambar Panel Kanan Halaman Login</h3>
-        <p class="text-xs text-slate-400">Atur gambar (misal: foto gedung / logo BNN) untuk panel sisi kanan halaman login. Jika belum diatur, panel akan tampil dengan warna biru polos.</p>
-      </div>
+    <div class="pb-3 border-b border-slate-100">
+      <h3 class="font-bold text-[#0F2F5B]">Gambar Panel Kanan Halaman Login</h3>
+      <p class="text-xs text-slate-400">Atur gambar (misal: foto gedung / logo BNN) untuk panel sisi kanan halaman login. Jika belum diatur, panel akan tampil dengan warna biru polos.</p>
     </div>
 
     <div class="mt-4 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -595,10 +562,7 @@
 {{-- Modal Tambah User Baru --}}
 <dialog id="modalAddUser" class="card p-5 max-w-md w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
   <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-    <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-xs">👤</div>
-      <h3 class="font-bold text-sm text-[#0F2F5B]">Tambah Administrator Baru</h3>
-    </div>
+    <h3 class="font-bold text-sm text-[#0F2F5B]">Tambah Administrator Baru</h3>
     <button onclick="document.getElementById('modalAddUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
   </div>
   <form method="POST" action="{{ route('admin.settings.users.store') }}" class="mt-3 space-y-3">
@@ -638,10 +602,7 @@
 {{-- Modal Edit User --}}
 <dialog id="modalEditUser" class="card p-5 max-w-md w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
   <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-    <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-xs">✏️</div>
-      <h3 class="font-bold text-sm text-[#0F2F5B]">Ubah Data Pengguna</h3>
-    </div>
+    <h3 class="font-bold text-sm text-[#0F2F5B]">Ubah Data Pengguna</h3>
     <button onclick="document.getElementById('modalEditUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
   </div>
   <form id="formEditUser" method="POST" action="" class="mt-3 space-y-3">
@@ -671,10 +632,7 @@
 {{-- Modal Reset Password User --}}
 <dialog id="modalResetPasswordUser" class="card p-5 max-w-sm w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
   <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-    <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-xs">🔑</div>
-      <h3 class="font-bold text-sm text-[#0F2F5B]">Reset Password Pengguna</h3>
-    </div>
+    <h3 class="font-bold text-sm text-[#0F2F5B]">Reset Password Pengguna</h3>
     <button onclick="document.getElementById('modalResetPasswordUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
   </div>
   <form id="formResetPasswordUser" method="POST" action="" class="mt-3 space-y-3">
