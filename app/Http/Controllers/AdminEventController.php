@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventPhoto;
 use App\Models\Signatory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
