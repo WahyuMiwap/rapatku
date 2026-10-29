@@ -17,11 +17,13 @@ class AdminLogController extends Controller
 
         $query = ActivityLog::query();
 
-        // Pencarian teks (IP Address, User Agent, Aktivitas)
+        // Pencarian teks (IP Address, User Agent, Aktivitas, Nama Pengguna, Email)
         if ($q !== '') {
             $query->where(function ($w) use ($escapedQ) {
                 $w->where('ip_address', 'like', "%{$escapedQ}%")
                   ->orWhere('activity', 'like', "%{$escapedQ}%")
+                  ->orWhere('user_name', 'like', "%{$escapedQ}%")
+                  ->orWhere('user_email', 'like', "%{$escapedQ}%")
                   ->orWhere('user_agent', 'like', "%{$escapedQ}%");
             });
         }
@@ -30,7 +32,7 @@ class AdminLogController extends Controller
         $totalLogs = ActivityLog::count();
 
         // Data terpaginasi (15 per halaman)
-        $logs = $query->latest('id')->paginate(15)->withQueryString();
+        $logs = $query->with('user')->latest('id')->paginate(15)->withQueryString();
 
         return view('admin.logs.index', compact(
             'logs',
