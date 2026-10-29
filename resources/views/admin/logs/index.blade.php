@@ -78,7 +78,7 @@
               {{-- Perangkat & IP --}}
               <td class="px-4 py-3.5 whitespace-nowrap">
                 <div class="font-medium text-slate-700 text-xs">{{ $log->device_info }}</div>
-                <div class="inline-flex items-center gap-1 text-[11px] text-slate-400 font-mono mt-0.5">
+                <div class="inline-flex items-center gap-1 text-[11px] text-slate-400 mt-0.5">
                   <svg class="w-3 h-3 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
                   <span>{{ $log->ip_address }}</span>
                 </div>

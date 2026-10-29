@@ -72,7 +72,7 @@
   <section class="card p-5 md:col-span-2" id="users">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shadow-xs border border-amber-200/50">
+        <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-sm shadow-xs border border-blue-200/50">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
@@ -80,14 +80,14 @@
         <div>
           <div class="flex items-center gap-2">
             <h3 class="font-bold text-[#0F2F5B]">Manajemen Akun Administrator</h3>
-            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-200">Khusus Superadmin</span>
+            <span class="text-[10px] bg-[#EAF0FA] text-[#0F2F5B] font-bold px-2 py-0.5 rounded-full border border-blue-200/60">Superadmin</span>
           </div>
           <p class="text-xs text-slate-400">Kelola daftar pengguna panitia, hak akses, dan atur password akun</p>
         </div>
       </div>
       <button type="button" onclick="openAddUserModal()" class="btn-bnn !py-2 text-xs shrink-0 inline-flex items-center gap-1.5 cursor-pointer">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        <span>+ Tambah Admin Baru</span>
+        <span>Tambah Admin Baru</span>
       </button>
     </div>
 
@@ -116,17 +116,16 @@
                   @endif
                 </div>
               </td>
-              <td class="py-2.5 px-3 text-slate-600 font-mono text-[11px]">
+              <td class="py-2.5 px-3 text-slate-600 text-xs">
                 {{ $u->email }}
               </td>
               <td class="py-2.5 px-3 text-center">
                 @if($u->isSuperAdmin())
-                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
-                    <svg class="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF0FA] text-[#0F2F5B] border border-blue-200">
                     Superadmin
                   </span>
                 @else
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF0FA] text-[#0F2F5B] border border-blue-200">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
                     Admin
                   </span>
                 @endif
@@ -149,7 +148,7 @@
                   <button type="button"
                           data-user="{{ json_encode(['id' => $u->id, 'name' => $u->name, 'email' => $u->email], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
                           onclick="openResetPasswordUserModal(JSON.parse(this.dataset.user))"
-                          class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
+                          class="p-1.5 text-slate-400 hover:text-[#174A9E] hover:bg-[#EAF0FA] rounded-lg transition cursor-pointer"
                           title="Reset Password Pengguna">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
                   </button>
@@ -552,7 +551,7 @@
       </div>
       <div class="col-span-2">
         <label class="text-xs font-bold text-[#0F2F5B]">Nomor Identitas</label>
-        <input type="text" name="nomor_identitas" required maxlength="100" placeholder="19650422 198911 2 001" class="input-bnn mt-1 text-xs font-mono">
+        <input type="text" name="nomor_identitas" required maxlength="100" placeholder="19650422 198911 2 001" class="input-bnn mt-1 text-xs">
       </div>
     </div>
     <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -588,7 +587,7 @@
       </div>
       <div class="col-span-2">
         <label class="text-xs font-bold text-[#0F2F5B]">Nomor Identitas</label>
-        <input type="text" id="editSignatoryNomor" name="nomor_identitas" required maxlength="100" class="input-bnn mt-1 text-xs font-mono">
+        <input type="text" id="editSignatoryNomor" name="nomor_identitas" required maxlength="100" class="input-bnn mt-1 text-xs">
       </div>
     </div>
     <div>
@@ -610,7 +609,7 @@
 <dialog id="modalAddUser" class="card p-5 max-w-md w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
   <div class="flex items-center justify-between pb-2 border-b border-slate-100">
     <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">👤</div>
+      <div class="w-7 h-7 rounded-lg bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-xs">👤</div>
       <h3 class="font-bold text-sm text-[#0F2F5B]">Tambah Administrator Baru</h3>
     </div>
     <button onclick="document.getElementById('modalAddUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
@@ -653,7 +652,7 @@
 <dialog id="modalEditUser" class="card p-5 max-w-md w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
   <div class="flex items-center justify-between pb-2 border-b border-slate-100">
     <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#174A9E] flex items-center justify-center font-bold text-xs">✏️</div>
+      <div class="w-7 h-7 rounded-lg bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-xs">✏️</div>
       <h3 class="font-bold text-sm text-[#0F2F5B]">Ubah Data Pengguna</h3>
     </div>
     <button onclick="document.getElementById('modalEditUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
@@ -686,7 +685,7 @@
 <dialog id="modalResetPasswordUser" class="card p-5 max-w-sm w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
   <div class="flex items-center justify-between pb-2 border-b border-slate-100">
     <div class="flex items-center gap-2">
-      <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">🔑</div>
+      <div class="w-7 h-7 rounded-lg bg-[#EAF0FA] text-[#0F2F5B] flex items-center justify-center font-bold text-xs">🔑</div>
       <h3 class="font-bold text-sm text-[#0F2F5B]">Reset Password Pengguna</h3>
     </div>
     <button onclick="document.getElementById('modalResetPasswordUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>

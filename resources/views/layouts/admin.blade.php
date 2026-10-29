@@ -56,7 +56,7 @@
               <div class="min-w-0 flex-1">
                 <div class="text-xs font-bold truncate leading-tight">{{ $adminEmail }}</div>
                 <div class="text-[10px] mt-0.5 leading-tight">
-                  <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider {{ auth()->user()?->isSuperAdmin() ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' : 'bg-blue-400/20 text-blue-200' }}">
+                  <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider {{ auth()->user()?->isSuperAdmin() ? 'bg-white/20 text-white border border-white/30' : 'bg-blue-400/20 text-blue-200' }}">
                     {{ auth()->user()?->role_label ?? 'Admin' }}
                   </span>
                 </div>

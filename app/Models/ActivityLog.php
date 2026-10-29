@@ -92,7 +92,7 @@ class ActivityLog extends Model
             'logout' => 'bg-slate-100 text-slate-700 border-slate-200',
             'login_failed' => 'bg-rose-50 text-rose-700 border-rose-200/80',
             'create_event' => 'bg-sky-50 text-sky-700 border-sky-200/80',
-            'update_event' => 'bg-amber-50 text-amber-700 border-amber-200/80',
+            'update_event' => 'bg-blue-50 text-[#174A9E] border-blue-200/80',
             'delete_event', 'delete_attendee' => 'bg-red-50 text-red-700 border-red-200/80',
             'change_password' => 'bg-purple-50 text-purple-700 border-purple-200/80',
             default => 'bg-blue-50 text-blue-700 border-blue-200',
