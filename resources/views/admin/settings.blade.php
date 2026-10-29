@@ -78,10 +78,7 @@
           </svg>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-[#0F2F5B]">Manajemen Akun Administrator</h3>
-            <span class="text-[10px] bg-[#EAF0FA] text-[#0F2F5B] font-bold px-2 py-0.5 rounded-full border border-blue-200/60">Superadmin</span>
-          </div>
+          <h3 class="font-bold text-[#0F2F5B]">Manajemen Akun Administrator</h3>
           <p class="text-xs text-slate-400">Kelola daftar pengguna panitia, hak akses, dan atur password akun</p>
         </div>
       </div>
@@ -99,38 +96,28 @@
             <th class="py-2.5 px-3 rounded-l-lg w-10 text-center">No</th>
             <th class="py-2.5 px-3">Nama Pengguna</th>
             <th class="py-2.5 px-3">Email Akun</th>
-            <th class="py-2.5 px-3 text-center w-32">Peran (Role)</th>
-            <th class="py-2.5 px-3 text-center w-32">Terdaftar</th>
-            <th class="py-2.5 px-3 text-center rounded-r-lg w-32">Aksi</th>
+            <th class="py-2.5 px-3">Peran (Role)</th>
+            <th class="py-2.5 px-3 text-center w-28">Terdaftar</th>
+            <th class="py-2.5 px-3 text-center rounded-r-lg w-28">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           @forelse($users as $idx => $u)
-            <tr class="hover:bg-slate-50 transition {{ $u->id === auth()->id() ? 'bg-blue-50/30' : '' }}">
+            <tr class="hover:bg-slate-50 transition">
               <td class="py-2.5 px-3 text-center text-slate-400 font-medium">{{ $idx + 1 }}</td>
               <td class="py-2.5 px-3 font-bold text-[#0F2F5B]">
-                <div class="flex items-center gap-1.5">
-                  <span>{{ $u->name }}</span>
-                  @if($u->id === auth()->id())
-                    <span class="text-[9px] bg-blue-100 text-[#174A9E] px-1.5 py-0.5 rounded font-extrabold">(Anda)</span>
-                  @endif
-                </div>
-              </td>
-              <td class="py-2.5 px-3 text-slate-600 text-xs">
-                {{ $u->email }}
-              </td>
-              <td class="py-2.5 px-3 text-center">
-                @if($u->isSuperAdmin())
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF0FA] text-[#0F2F5B] border border-blue-200">
-                    Superadmin
-                  </span>
-                @else
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                    Admin
-                  </span>
+                {{ $u->name }}
+                @if($u->id === auth()->id())
+                  <span class="text-slate-400 font-normal text-xs ml-1">(Anda)</span>
                 @endif
               </td>
-              <td class="py-2.5 px-3 text-center text-slate-400 tabular text-[11px]">
+              <td class="py-2.5 px-3 text-slate-600">
+                {{ $u->email }}
+              </td>
+              <td class="py-2.5 px-3 text-slate-700">
+                {{ $u->role_label }}
+              </td>
+              <td class="py-2.5 px-3 text-center text-slate-600 tabular text-xs">
                 {{ $u->created_at?->format('d/m/Y') ?? '-' }}
               </td>
               <td class="py-2.5 px-3 text-center">
@@ -176,7 +163,7 @@
           @empty
             <tr>
               <td colspan="6" class="py-6 text-center text-slate-400 text-xs">
-                Belum ada data admin lain. Klik tombol "+ Tambah Admin Baru".
+                Belum ada data admin lain. Klik tombol "Tambah Admin Baru".
               </td>
             </tr>
           @endforelse
