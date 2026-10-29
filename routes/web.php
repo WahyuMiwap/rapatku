@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminAttendeeController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminEventController;
 use App\Http\Controllers\AdminLogController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
@@ -24,7 +25,7 @@ Route::post('/absen/{slug}', [AttendanceController::class, 'store'])
     ->middleware('throttle:absen')->name('absen.store');
 Route::get('/absen/{slug}/sukses', [AttendanceController::class, 'success'])->name('absen.success');
 
-// Admin (auth)
+// Admin (auth) - Dapat diakses oleh Admin & Superadmin
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminEventController::class, 'dashboard'])->name('dashboard');
     Route::get('/events/suggestions', [AdminEventController::class, 'suggestions'])->name('events.suggestions');
@@ -45,27 +46,45 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/events/{event}/photos', [AdminEventController::class, 'storePhoto'])->name('events.photos.store');
     Route::delete('/events/{event}/photos/{photo}', [AdminEventController::class, 'destroyPhoto'])->name('events.photos.destroy');
 
-    Route::get('/settings', [AdminEventController::class, 'settings'])->name('settings.index');
-    Route::post('/settings/password', [AdminEventController::class, 'updatePassword'])->name('settings.password');
-    Route::post('/settings/profile', [AdminEventController::class, 'updateProfile'])->name('settings.profile');
-    Route::post('/settings/categories', [AdminEventController::class, 'storeCategory'])->name('settings.categories.store');
-    Route::put('/settings/categories/{category}', [AdminEventController::class, 'updateCategory'])->name('settings.categories.update');
-    Route::delete('/settings/categories/{category}', [AdminEventController::class, 'destroyCategory'])->name('settings.categories.destroy');
-    Route::post('/settings/signatories', [AdminEventController::class, 'storeSignatory'])->name('settings.signatories.store');
-    Route::put('/settings/signatories/{signatory}', [AdminEventController::class, 'updateSignatory'])->name('settings.signatories.update');
-    Route::patch('/settings/signatories/{signatory}/toggle', [AdminEventController::class, 'toggleSignatory'])->name('settings.signatories.toggle');
-    Route::delete('/settings/signatories/{signatory}', [AdminEventController::class, 'destroySignatory'])->name('settings.signatories.destroy');
-    Route::post('/settings/login-background', [AdminEventController::class, 'updateLoginBackground'])->name('settings.login-background.update');
-    Route::delete('/settings/login-background', [AdminEventController::class, 'destroyLoginBackground'])->name('settings.login-background.destroy');
-    Route::post('/settings/logo', [AdminEventController::class, 'updateLogo'])->name('settings.logo.update');
-    Route::delete('/settings/logo', [AdminEventController::class, 'destroyLogo'])->name('settings.logo.destroy');
+    // Kelola Data Peserta
     Route::put('/attendees/{attendee}', [AdminAttendeeController::class, 'update'])->name('attendees.update');
     Route::delete('/attendees/{attendee}', [AdminAttendeeController::class, 'destroy'])->name('attendees.destroy');
     Route::get('/attendees/{attendee}/signature', [AdminAttendeeController::class, 'signature'])->name('attendees.signature');
 
-    // Log Aktivitas Sistem & Riwayat Login
-    Route::get('/logs', [AdminLogController::class, 'index'])->name('logs.index');
-    Route::delete('/logs', [AdminLogController::class, 'destroyAll'])->name('logs.destroy');
+    // Pengaturan Akun Pribadi (Tersedia untuk semua admin)
+    Route::get('/settings', [AdminEventController::class, 'settings'])->name('settings.index');
+    Route::post('/settings/password', [AdminEventController::class, 'updatePassword'])->name('settings.password');
+    Route::post('/settings/profile', [AdminEventController::class, 'updateProfile'])->name('settings.profile');
+
+    // Fitur Khusus SUPERADMIN: Kelola Admin, Kategori, Penandatangan, Logo, Background, & Log Sistem
+    Route::middleware('superadmin')->group(function () {
+        // Kelola Pengguna / Admin
+        Route::post('/settings/users', [AdminUserController::class, 'store'])->name('settings.users.store');
+        Route::put('/settings/users/{user}', [AdminUserController::class, 'update'])->name('settings.users.update');
+        Route::put('/settings/users/{user}/password', [AdminUserController::class, 'resetPassword'])->name('settings.users.password');
+        Route::delete('/settings/users/{user}', [AdminUserController::class, 'destroy'])->name('settings.users.destroy');
+
+        // Kelola Kategori
+        Route::post('/settings/categories', [AdminEventController::class, 'storeCategory'])->name('settings.categories.store');
+        Route::put('/settings/categories/{category}', [AdminEventController::class, 'updateCategory'])->name('settings.categories.update');
+        Route::delete('/settings/categories/{category}', [AdminEventController::class, 'destroyCategory'])->name('settings.categories.destroy');
+
+        // Kelola Master Penandatangan
+        Route::post('/settings/signatories', [AdminEventController::class, 'storeSignatory'])->name('settings.signatories.store');
+        Route::put('/settings/signatories/{signatory}', [AdminEventController::class, 'updateSignatory'])->name('settings.signatories.update');
+        Route::patch('/settings/signatories/{signatory}/toggle', [AdminEventController::class, 'toggleSignatory'])->name('settings.signatories.toggle');
+        Route::delete('/settings/signatories/{signatory}', [AdminEventController::class, 'destroySignatory'])->name('settings.signatories.destroy');
+
+        // Kustomisasi Tampilan
+        Route::post('/settings/login-background', [AdminEventController::class, 'updateLoginBackground'])->name('settings.login-background.update');
+        Route::delete('/settings/login-background', [AdminEventController::class, 'destroyLoginBackground'])->name('settings.login-background.destroy');
+        Route::post('/settings/logo', [AdminEventController::class, 'updateLogo'])->name('settings.logo.update');
+        Route::delete('/settings/logo', [AdminEventController::class, 'destroyLogo'])->name('settings.logo.destroy');
+
+        // Log Aktivitas Sistem & Riwayat Login
+        Route::get('/logs', [AdminLogController::class, 'index'])->name('logs.index');
+        Route::delete('/logs', [AdminLogController::class, 'destroyAll'])->name('logs.destroy');
+    });
 });
 
 Route::get('/manifest.json', [AdminEventController::class, 'manifest'])->name('manifest');

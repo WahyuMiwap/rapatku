@@ -62,8 +62,127 @@
 
     {{-- Info status akun --}}
     <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-      <span>Peran: <strong class="text-[#0F2F5B]">Panitia BNN</strong></span>
+      <span>Peran: <strong class="text-[#0F2F5B]">{{ $user->role_label }}</strong></span>
       <span>Status: <strong class="text-green-600">Aktif</strong></span>
+    </div>
+  </section>
+
+  @if($user->isSuperAdmin())
+  {{-- Card: Manajemen Akun Administrator (KHUSUS SUPERADMIN) --}}
+  <section class="card p-5 md:col-span-2" id="users">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shadow-xs border border-amber-200/50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-[#0F2F5B]">Manajemen Akun Administrator</h3>
+            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full border border-amber-200">Khusus Superadmin</span>
+          </div>
+          <p class="text-xs text-slate-400">Kelola daftar pengguna panitia, hak akses, dan atur password akun</p>
+        </div>
+      </div>
+      <button type="button" onclick="openAddUserModal()" class="btn-bnn !py-2 text-xs shrink-0 inline-flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>+ Tambah Admin Baru</span>
+      </button>
+    </div>
+
+    {{-- Tabel Daftar Pengguna --}}
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full text-xs text-left">
+        <thead>
+          <tr class="bg-[#EDF2F9] text-[#0F2F5B] font-bold border-b border-slate-200">
+            <th class="py-2.5 px-3 rounded-l-lg w-10 text-center">No</th>
+            <th class="py-2.5 px-3">Nama Pengguna</th>
+            <th class="py-2.5 px-3">Email Akun</th>
+            <th class="py-2.5 px-3 text-center w-32">Peran (Role)</th>
+            <th class="py-2.5 px-3 text-center w-32">Terdaftar</th>
+            <th class="py-2.5 px-3 text-center rounded-r-lg w-32">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @forelse($users as $idx => $u)
+            <tr class="hover:bg-slate-50 transition {{ $u->id === auth()->id() ? 'bg-blue-50/30' : '' }}">
+              <td class="py-2.5 px-3 text-center text-slate-400 font-medium">{{ $idx + 1 }}</td>
+              <td class="py-2.5 px-3 font-bold text-[#0F2F5B]">
+                <div class="flex items-center gap-1.5">
+                  <span>{{ $u->name }}</span>
+                  @if($u->id === auth()->id())
+                    <span class="text-[9px] bg-blue-100 text-[#174A9E] px-1.5 py-0.5 rounded font-extrabold">(Anda)</span>
+                  @endif
+                </div>
+              </td>
+              <td class="py-2.5 px-3 text-slate-600 font-mono text-[11px]">
+                {{ $u->email }}
+              </td>
+              <td class="py-2.5 px-3 text-center">
+                @if($u->isSuperAdmin())
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200">
+                    <svg class="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    Superadmin
+                  </span>
+                @else
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF0FA] text-[#0F2F5B] border border-blue-200">
+                    Admin
+                  </span>
+                @endif
+              </td>
+              <td class="py-2.5 px-3 text-center text-slate-400 tabular text-[11px]">
+                {{ $u->created_at?->format('d/m/Y') ?? '-' }}
+              </td>
+              <td class="py-2.5 px-3 text-center">
+                <div class="inline-flex items-center gap-1">
+                  {{-- Tombol Edit Data --}}
+                  <button type="button"
+                          data-user="{{ json_encode(['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
+                          onclick="openEditUserModal(JSON.parse(this.dataset.user))"
+                          class="p-1.5 text-slate-400 hover:text-[#174A9E] hover:bg-[#EAF0FA] rounded-lg transition cursor-pointer"
+                          title="Ubah Data Pengguna">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  </button>
+
+                  {{-- Tombol Reset Password --}}
+                  <button type="button"
+                          data-user="{{ json_encode(['id' => $u->id, 'name' => $u->name, 'email' => $u->email], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
+                          onclick="openResetPasswordUserModal(JSON.parse(this.dataset.user))"
+                          class="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition cursor-pointer"
+                          title="Reset Password Pengguna">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                  </button>
+
+                  {{-- Tombol Hapus --}}
+                  @if($u->id !== auth()->id())
+                    <form method="POST" action="{{ route('admin.settings.users.destroy', $u) }}"
+                          data-confirm="Apakah Anda yakin ingin menghapus akun {{ $u->role_label }} '{{ addslashes($u->name) }}' ({{ $u->email }})? Akun ini tidak akan dapat login lagi ke sistem."
+                          data-confirm-title="Hapus Akun Pengguna"
+                          data-confirm-btn="Ya, Hapus Akun"
+                          class="inline">
+                      @csrf @method('DELETE')
+                      <button type="submit" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer" title="Hapus Akun">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      </button>
+                    </form>
+                  @else
+                    <span class="p-1.5 text-slate-200 cursor-not-allowed" title="Akun Anda sendiri tidak dapat dihapus">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </span>
+                  @endif
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="6" class="py-6 text-center text-slate-400 text-xs">
+                Belum ada data admin lain. Klik tombol "+ Tambah Admin Baru".
+              </td>
+            </tr>
+          @endforelse
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -351,6 +470,7 @@
       </div>
     </div>
   </section>
+  @endif
 
   {{-- Card 5: Konfigurasi Sistem Rapatku (Informasi teknis) --}}
   <section class="card p-5 md:col-span-2">
@@ -485,6 +605,113 @@
   </form>
 </dialog>
 
+@if($user->isSuperAdmin())
+{{-- Modal Tambah User Baru --}}
+<dialog id="modalAddUser" class="card p-5 max-w-md w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
+  <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">👤</div>
+      <h3 class="font-bold text-sm text-[#0F2F5B]">Tambah Administrator Baru</h3>
+    </div>
+    <button onclick="document.getElementById('modalAddUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
+  </div>
+  <form method="POST" action="{{ route('admin.settings.users.store') }}" class="mt-3 space-y-3">
+    @csrf
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Nama Lengkap</label>
+      <input type="text" name="name" required maxlength="100" placeholder="cth: Ahmad Fauzi" class="input-bnn mt-1 text-xs">
+    </div>
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Alamat Email</label>
+      <input type="email" name="email" required maxlength="150" placeholder="panitia@bnn.go.id" class="input-bnn mt-1 text-xs">
+    </div>
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Peran (Hak Akses)</label>
+      <select name="role" required class="input-bnn mt-1 text-xs">
+        <option value="admin" selected>Admin (Kelola rapat, absensi, dokumentasi & rekap)</option>
+        <option value="superadmin">Superadmin (Akses penuh + kelola admin, pengaturan & log)</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <div>
+        <label class="text-xs font-bold text-[#0F2F5B]">Password Baru</label>
+        <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="input-bnn mt-1 text-xs">
+      </div>
+      <div>
+        <label class="text-xs font-bold text-[#0F2F5B]">Konfirmasi Password</label>
+        <input type="password" name="password_confirmation" required minlength="6" placeholder="Ulangi password" class="input-bnn mt-1 text-xs">
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <button type="button" onclick="document.getElementById('modalAddUser').close()" class="btn-soft !py-1.5 text-xs">Batal</button>
+      <button type="submit" class="btn-bnn !py-1.5 text-xs">Simpan Pengguna</button>
+    </div>
+  </form>
+</dialog>
+
+{{-- Modal Edit User --}}
+<dialog id="modalEditUser" class="card p-5 max-w-md w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
+  <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#174A9E] flex items-center justify-center font-bold text-xs">✏️</div>
+      <h3 class="font-bold text-sm text-[#0F2F5B]">Ubah Data Pengguna</h3>
+    </div>
+    <button onclick="document.getElementById('modalEditUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
+  </div>
+  <form id="formEditUser" method="POST" action="" class="mt-3 space-y-3">
+    @csrf @method('PUT')
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Nama Lengkap</label>
+      <input type="text" id="editUserName" name="name" required maxlength="100" class="input-bnn mt-1 text-xs">
+    </div>
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Alamat Email</label>
+      <input type="email" id="editUserEmail" name="email" required maxlength="150" class="input-bnn mt-1 text-xs">
+    </div>
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Peran (Hak Akses)</label>
+      <select id="editUserRole" name="role" required class="input-bnn mt-1 text-xs">
+        <option value="admin">Admin (Kelola rapat, absensi, dokumentasi & rekap)</option>
+        <option value="superadmin">Superadmin (Akses penuh + kelola admin, pengaturan & log)</option>
+      </select>
+    </div>
+    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <button type="button" onclick="document.getElementById('modalEditUser').close()" class="btn-soft !py-1.5 text-xs">Batal</button>
+      <button type="submit" class="btn-bnn !py-1.5 text-xs">Simpan Perubahan</button>
+    </div>
+  </form>
+</dialog>
+
+{{-- Modal Reset Password User --}}
+<dialog id="modalResetPasswordUser" class="card p-5 max-w-sm w-full backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm rounded-2xl m-auto shadow-2xl border border-slate-200">
+  <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">🔑</div>
+      <h3 class="font-bold text-sm text-[#0F2F5B]">Reset Password Pengguna</h3>
+    </div>
+    <button onclick="document.getElementById('modalResetPasswordUser').close()" type="button" class="text-slate-400 hover:text-slate-700 text-lg font-bold leading-none">&times;</button>
+  </div>
+  <form id="formResetPasswordUser" method="POST" action="" class="mt-3 space-y-3">
+    @csrf @method('PUT')
+    <p class="text-xs text-slate-500">
+      Atur ulang password untuk akun: <strong id="resetTargetUserEmail" class="text-[#0F2F5B]"></strong>
+    </p>
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Password Baru</label>
+      <input type="password" name="password" required minlength="6" placeholder="Minimal 6 karakter" class="input-bnn mt-1 text-xs">
+    </div>
+    <div>
+      <label class="text-xs font-bold text-[#0F2F5B]">Konfirmasi Password Baru</label>
+      <input type="password" name="password_confirmation" required minlength="6" placeholder="Ulangi password baru" class="input-bnn mt-1 text-xs">
+    </div>
+    <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <button type="button" onclick="document.getElementById('modalResetPasswordUser').close()" class="btn-soft !py-1.5 text-xs">Batal</button>
+      <button type="submit" class="btn-bnn !py-1.5 text-xs">Reset Password</button>
+    </div>
+  </form>
+</dialog>
+@endif
+
 @push('scripts')
 <script>
 function openEditCategoryModal(id, name) {
@@ -509,6 +736,28 @@ function openEditSignatoryModal(signatory) {
   document.getElementById('editSignatoryJenis').value = signatory.jenis_identitas || 'NIP';
   document.getElementById('editSignatoryNomor').value = signatory.nomor_identitas || '';
   document.getElementById('editSignatoryActive').value = signatory.is_active ? '1' : '0';
+  modal.showModal();
+}
+
+function openAddUserModal() {
+  document.getElementById('modalAddUser').showModal();
+}
+
+function openEditUserModal(user) {
+  const modal = document.getElementById('modalEditUser');
+  const form = document.getElementById('formEditUser');
+  form.action = '/admin/settings/users/' + user.id;
+  document.getElementById('editUserName').value = user.name || '';
+  document.getElementById('editUserEmail').value = user.email || '';
+  document.getElementById('editUserRole').value = user.role || 'admin';
+  modal.showModal();
+}
+
+function openResetPasswordUserModal(user) {
+  const modal = document.getElementById('modalResetPasswordUser');
+  const form = document.getElementById('formResetPasswordUser');
+  form.action = '/admin/settings/users/' + user.id + '/password';
+  document.getElementById('resetTargetUserEmail').textContent = user.name + ' (' + user.email + ')';
   modal.showModal();
 }
 

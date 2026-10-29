@@ -35,12 +35,14 @@
               </svg>
               <span>Pengaturan</span>
             </a>
-            <a href="{{ route('admin.logs.index') }}" class="side-link {{ $active === 'logs' ? 'active' : '' }}">
-              <svg class="w-4 h-4 shrink-0 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 11-18 0z" />
-              </svg>
-              <span>Log Aktivitas</span>
-            </a>
+            @if(auth()->user()?->isSuperAdmin())
+              <a href="{{ route('admin.logs.index') }}" class="side-link {{ $active === 'logs' ? 'active' : '' }}">
+                <svg class="w-4 h-4 shrink-0 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 11-18 0z" />
+                </svg>
+                <span>Log Aktivitas</span>
+              </a>
+            @endif
           </nav>
         </div>
 
@@ -53,7 +55,11 @@
               </div>
               <div class="min-w-0 flex-1">
                 <div class="text-xs font-bold truncate leading-tight">{{ $adminEmail }}</div>
-                <div class="text-[10px] text-blue-200/70 leading-tight">Panitia</div>
+                <div class="text-[10px] mt-0.5 leading-tight">
+                  <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider {{ auth()->user()?->isSuperAdmin() ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' : 'bg-blue-400/20 text-blue-200' }}">
+                    {{ auth()->user()?->role_label ?? 'Admin' }}
+                  </span>
+                </div>
               </div>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="mt-2.5">
@@ -90,9 +96,11 @@
           <a href="{{ route('admin.settings.index') }}" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition {{ $active === 'settings' ? 'bg-[#0F2F5B] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200' }}">
             Pengaturan
           </a>
-          <a href="{{ route('admin.logs.index') }}" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition {{ $active === 'logs' ? 'bg-[#0F2F5B] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200' }}">
-            Log Aktivitas
-          </a>
+          @if(auth()->user()?->isSuperAdmin())
+            <a href="{{ route('admin.logs.index') }}" class="px-3 py-1.5 rounded-xl font-bold whitespace-nowrap transition {{ $active === 'logs' ? 'bg-[#0F2F5B] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200' }}">
+              Log Aktivitas
+            </a>
+          @endif
         </div>
 
         @yield('admin')

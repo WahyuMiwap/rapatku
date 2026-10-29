@@ -33,9 +33,12 @@ rapatku/
 │   │   │   ├── AdminAuthController.php       # Autentikasi admin, throttle login, catat activity log
 │   │   │   ├── AdminEventController.php      # CRUD rapat, foto dokumentasi, settings logo/bg, export
 │   │   │   ├── AdminLogController.php        # Audit trail aktivitas admin & login history
+│   │   │   ├── AdminUserController.php       # [BARU] CRUD akun admin, ubah role, reset password oleh Superadmin
 │   │   │   ├── AttendanceController.php      # Alur publik absensi peserta, validasi token, simpan TTD
 │   │   │   ├── Controller.php                # Base Laravel controller
 │   │   │   └── EventController.php           # Tampilan proyektor (display QR) & API state polling
+│   │   └── Middleware/
+│   │       └── EnsureSuperAdmin.php          # [BARU] Proteksi akses khusus Superadmin (403 jika admin biasa)
 │   ├── Models/
 │   │   ├── ActivityLog.php                   # Model log aktivitas sistem & riwayat audit
 │   │   ├── Attendee.php                      # Model peserta rapat, normalisasi nomor telepon, UUID
@@ -53,8 +56,8 @@ rapatku/
 ├── config/                                   # Konfigurasi aplikasi (auth, cache, database, filesystems, dll.)
 ├── database/
 │   ├── factories/                            # Factory dummy data untuk pengujian
-│   ├── migrations/                           # 12 berkas skema migrasi database
-│   └── seeders/                              # Database seeder (akun default admin, kategori awal)
+│   ├── migrations/                           # 13 berkas skema migrasi database (termasuk kolom role)
+│   └── seeders/                              # Database seeder (akun default superadmin, kategori awal)
 ├── note/                                     # Arsip dokumentasi arsitektur, audit, dan pedoman teknis
 │   ├── analisis_struktur_web.md              # [Dokumen ini] Analisis arsitektur lengkap terkini
 │   ├── architecture.md                       # Catatan rancangan awal sistem
@@ -161,7 +164,8 @@ flowchart TD
 - **`EventController`**: Mengatur tampilan layar proyektor rapat (`display.blade.php`) dan melayani request AJAX polling status (`/admin/events/{event}/state`) untuk memperbarui token QR dan menghitung jumlah kehadiran (*live counter*).
 - **`AdminEventController`**: Pusat kendali agenda rapat. Mengatur pembuatan acara baru dengan generate slug otomatis, pencarian agenda, toggle status aktif/tutup, unggah foto dokumentasi (maks 5 foto), auto-resize & kompresi logo instansi via PHP GD, export CSV/Excel, serta kustomisasi background login.
 - **`AdminAttendeeController`**: Mengelola daftar peserta terdaftar, pengubahan data nama/divisi/instansi, penghapusan data salah input, dan *streaming* aman gambar tanda tangan peserta dari disk privat ke panel admin.
-- **`AdminLogController`**: Menampilkan audit trail aktivitas sistem (riwayat login admin, tindakan CRUD penting, alamat IP, dan User Agent) serta fitur pembersihan log (*purge logs*).
+- **`AdminUserController`**: Mengelola seluruh akun administrator sistem (tambah admin baru, penetapan peran Superadmin/Admin, reset password pengguna, dan penghapusan akun) dengan pengamanan anti *self-delete* dan pencegahan penghapusan Superadmin terakhir.
+- **`AdminLogController`**: Menampilkan audit trail aktivitas sistem (riwayat login admin, tindakan CRUD penting, alamat IP, dan User Agent) serta fitur pembersihan log (*purge logs*), terproteksi khusus untuk Superadmin.
 - **`AdminAuthController`**: Menangani proses otentikasi admin dengan rate-limiting ketat (maksimal 5 percobaan per menit) serta pencatatan otomatis ke tabel `activity_logs`.
 
 ### 3.2 Model & Relasi Data
@@ -241,13 +245,26 @@ Aplikasi menggunakan 7 tabel bisnis utama:
 | `PUT` | `/admin/attendees/{attendee}` | `admin.attendees.update` | `AdminAttendeeController@update` | Admin (Auth) |
 | `DELETE` | `/admin/attendees/{attendee}` | `admin.attendees.destroy` | `AdminAttendeeController@destroy` | Admin (Auth) |
 | `GET` | `/admin/attendees/{attendee}/signature` | `admin.attendees.signature` | `AdminAttendeeController@signature` | Admin (Auth) |
-| `GET` | `/admin/settings` | `admin.settings.index` | `AdminEventController@settings` | Admin (Auth) |
-| `POST` | `/admin/settings/logo` | `admin.settings.logo.update` | `AdminEventController@updateLogo` | Admin (Auth) |
-| `DELETE` | `/admin/settings/logo` | `admin.settings.logo.destroy` | `AdminEventController@destroyLogo` | Admin (Auth) |
-| `POST` | `/admin/settings/login-background` | `admin.settings.login-background.update` | `AdminEventController@updateLoginBackground` | Admin (Auth) |
-| `DELETE` | `/admin/settings/login-background` | `admin.settings.login-background.destroy` | `AdminEventController@destroyLoginBackground` | Admin (Auth) |
-| `GET` | `/admin/logs` | `admin.logs.index` | `AdminLogController@index` | Admin (Auth) |
-| `DELETE` | `/admin/logs` | `admin.logs.destroy` | `AdminLogController@destroyAll` | Admin (Auth) |
+| `GET` | `/admin/settings` | `admin.settings.index` | `AdminEventController@settings` | Admin & Superadmin |
+| `POST` | `/admin/settings/password` | `admin.settings.password` | `AdminEventController@updatePassword` | Admin & Superadmin |
+| `POST` | `/admin/settings/profile` | `admin.settings.profile` | `AdminEventController@updateProfile` | Admin & Superadmin |
+| `POST` | `/admin/settings/users` | `admin.settings.users.store` | `AdminUserController@store` | **Superadmin Saja** |
+| `PUT` | `/admin/settings/users/{user}` | `admin.settings.users.update` | `AdminUserController@update` | **Superadmin Saja** |
+| `PUT` | `/admin/settings/users/{user}/password` | `admin.settings.users.password` | `AdminUserController@resetPassword` | **Superadmin Saja** |
+| `DELETE` | `/admin/settings/users/{user}` | `admin.settings.users.destroy` | `AdminUserController@destroy` | **Superadmin Saja** |
+| `POST` | `/admin/settings/categories` | `admin.settings.categories.store` | `AdminEventController@storeCategory` | **Superadmin Saja** |
+| `PUT` | `/admin/settings/categories/{category}` | `admin.settings.categories.update` | `AdminEventController@updateCategory` | **Superadmin Saja** |
+| `DELETE` | `/admin/settings/categories/{category}` | `admin.settings.categories.destroy` | `AdminEventController@destroyCategory` | **Superadmin Saja** |
+| `POST` | `/admin/settings/signatories` | `admin.settings.signatories.store` | `AdminEventController@storeSignatory` | **Superadmin Saja** |
+| `PUT` | `/admin/settings/signatories/{signatory}` | `admin.settings.signatories.update` | `AdminEventController@updateSignatory` | **Superadmin Saja** |
+| `PATCH` | `/admin/settings/signatories/{signatory}/toggle` | `admin.settings.signatories.toggle` | `AdminEventController@toggleSignatory` | **Superadmin Saja** |
+| `DELETE` | `/admin/settings/signatories/{signatory}` | `admin.settings.signatories.destroy` | `AdminEventController@destroySignatory` | **Superadmin Saja** |
+| `POST` | `/admin/settings/logo` | `admin.settings.logo.update` | `AdminEventController@updateLogo` | **Superadmin Saja** |
+| `DELETE` | `/admin/settings/logo` | `admin.settings.logo.destroy` | `AdminEventController@destroyLogo` | **Superadmin Saja** |
+| `POST` | `/admin/settings/login-background` | `admin.settings.login-background.update` | `AdminEventController@updateLoginBackground` | **Superadmin Saja** |
+| `DELETE` | `/admin/settings/login-background` | `admin.settings.login-background.destroy` | `AdminEventController@destroyLoginBackground` | **Superadmin Saja** |
+| `GET` | `/admin/logs` | `admin.logs.index` | `AdminLogController@index` | **Superadmin Saja** |
+| `DELETE` | `/admin/logs` | `admin.logs.destroy` | `AdminLogController@destroyAll` | **Superadmin Saja** |
 
 ---
 

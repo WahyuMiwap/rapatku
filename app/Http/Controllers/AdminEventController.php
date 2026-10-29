@@ -436,6 +436,7 @@ class AdminEventController extends Controller
             ->paginate(6)
             ->withQueryString()
             ->fragment('penandatangan');
+        $users = $user->isSuperAdmin() ? User::orderBy('role', 'desc')->orderBy('name')->get() : collect();
 
         $loginBg = null;
         try {
@@ -450,7 +451,7 @@ class AdminEventController extends Controller
             }
         } catch (\Throwable $e) {}
 
-        return view('admin.settings', compact('user', 'categories', 'loginBg', 'signatories'));
+        return view('admin.settings', compact('user', 'categories', 'loginBg', 'signatories', 'users'));
     }
 
     public function storeCategory(Request $request)

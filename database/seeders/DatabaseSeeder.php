@@ -10,11 +10,12 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Admin tunggal via .env (register publik tidak disediakan).
+        // Akun superadmin default via .env (register publik tidak disediakan).
         User::updateOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@rapatku.local')],
             [
-                'name' => 'Admin',
+                'name' => 'Superadmin',
+                'role' => 'superadmin',
                 'password' => Hash::make(env('ADMIN_PASSWORD', 'admin123')),
             ]
         );
