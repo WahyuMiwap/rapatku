@@ -42,6 +42,19 @@
       outline: none !important; 
       background: transparent !important; 
     }
+    .signatures-container {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: flex-start !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      margin-top: 2rem !important;
+    }
+    .signature-col {
+      width: 46% !important;
+      text-align: center !important;
+    }
     .kop-line-thick {
       border-bottom: 2.5px solid #000 !important;
       -webkit-print-color-adjust: exact;
@@ -189,7 +202,7 @@
         <tr class="bg-[#EDF2F9] text-slate-800">
           <th class="border border-slate-400 px-2 py-2 text-center w-10">No</th>
           <th class="border border-slate-400 px-3 py-2 text-left">Nama</th>
-          <th class="border border-slate-400 px-3 py-2 text-left">Divisi / Asal Instansi / Tempat</th>
+          <th class="border border-slate-400 px-3 py-2 text-left">Divisi / Asal Instansi / Jabatan</th>
           <th class="border border-slate-400 px-3 py-2 text-center">No. Telp</th>
           <th class="border border-slate-400 px-2 py-2 text-center w-12">L/P</th>
           <th class="border border-slate-400 px-3 py-2 text-center w-36">Tanda Tangan</th>
@@ -200,7 +213,16 @@
         <tr>
           <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
           <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
-          <td class="border border-slate-400 px-3 py-2">{{ $a->divisi ?: $a->nama_instansi }}</td>
+          <td class="border border-slate-400 px-3 py-2">
+            @if($a->divisi)
+              <span>{{ $a->divisi }}</span>
+            @else
+              <span>{{ $a->nama_instansi ?: '-' }}</span>
+              @if($a->jabatan)
+                <div class="text-[11px] text-slate-600 font-normal mt-0.5">({{ $a->jabatan }})</div>
+              @endif
+            @endif
+          </td>
           <td class="border border-slate-400 px-3 py-2 text-center">{{ $a->no_telp }}</td>
           <td class="border border-slate-400 px-2 py-2 text-center">{{ $a->jenis_kelamin }}</td>
           <td class="border border-slate-400 px-3 py-1.5 text-center">
@@ -219,96 +241,143 @@
       </tbody>
     </table>
 
-    {{-- Struktur Tanda Tangan Formal (1 Pihak di Kanan Sesuai Referensi) --}}
-    <div class="mt-8 flex justify-end">
-      <div class="w-80 text-center text-sm leading-relaxed text-slate-800 relative">
-        {{-- 1. Lokasi / Kota & Tanggal Pelaksanaan Acara --}}
-        <div id="signatoryCityDate" contenteditable="true" spellcheck="false" 
-             class="hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text font-normal"
-             title="Klik untuk mengedit kota & tanggal">
-          Surabaya, {{ \Carbon\Carbon::parse($event->event_date)->locale('id')->isoFormat('D MMMM Y') }}
+    {{-- Struktur Tanda Tangan Formal (2 Pihak: Mengetahui & Pembuat) --}}
+    <div class="signatures-container mt-8 flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-4 text-sm leading-relaxed text-slate-800">
+      
+      {{-- KOLOM KIRI: MENGETAHUI --}}
+      <div class="signature-col w-full sm:w-72 md:w-80 text-center relative">
+        {{-- Penanda Mengetahui --}}
+        <div class="font-normal text-slate-800">
+          Mengetahui,
         </div>
 
-        {{-- 2. Jabatan Penandatangan --}}
-        <div id="signatoryJabatan" contenteditable="true" spellcheck="false"
+        {{-- Jabatan Pejabat Mengetahui --}}
+        <div id="signatoryMengetahuiJabatan" contenteditable="true" spellcheck="false"
              class="font-normal hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text mt-0.5"
              title="Klik untuk mengedit jabatan">
-          {{ $event->jabatan_penandatangan ?: 'Ketua Panitia,' }}
+          {{ $event->jabatan_mengetahui ?: ($event->jabatan_penandatangan ?: 'Kepala BNN Kota Surabaya,') }}
         </div>
 
-        {{-- 3. Ruang Tempat Tanda Tangan --}}
-        <div class="h-24 sm:h-28 flex items-center justify-center">
-          {{-- Ruang kosong tanda tangan --}}
+        {{-- Ruang Tempat Tanda Tangan --}}
+        <div class="h-20 sm:h-24 flex items-center justify-center">
+          {{-- Ruang tanda tangan basah --}}
         </div>
 
-        {{-- 4. Nama Orang yang Bertanda Tangan (Dengan Dropdown Pilihan Nama & NIP) --}}
+        {{-- Nama Pejabat Mengetahui --}}
         <div class="relative">
-          <div id="signatoryNameTrigger"
-               onclick="toggleSignatoryDropdown(event)"
+          <div id="signatoryMengetahuiTrigger"
+               onclick="toggleSignatoryDropdown(event, 'mengetahui')"
                class="inline-flex items-center justify-center gap-1.5 group cursor-pointer hover:bg-amber-50/80 rounded-lg px-2 py-0.5 transition border border-transparent hover:border-amber-200"
-               title="Klik untuk memilih nama penandatangan & NIP otomatis">
-            <span id="signatoryNameText" contenteditable="true" spellcheck="false"
+               title="Klik untuk memilih nama pejabat & NIP otomatis">
+            <span id="signatoryMengetahuiNameText" contenteditable="true" spellcheck="false"
                   onclick="event.stopPropagation()"
                   class="font-bold underline focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1 outline-none cursor-text text-sm">
-              {{ $event->nama_penandatangan ?: 'Nama Penandatangan' }}
+              {{ $event->nama_mengetahui ?: ($event->nama_penandatangan ?: 'Kombes Pol. Heru Prasetyo, S.I.K., M.Hum.') }}
             </span>
             <svg class="noprint w-3.5 h-3.5 text-slate-400 group-hover:text-[#174A9E] transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
 
-          {{-- 5. NIP Penandatangan --}}
-          <div id="signatoryNipText" contenteditable="true" spellcheck="false"
+          {{-- NIP Pejabat Mengetahui --}}
+          <div id="signatoryMengetahuiNipText" contenteditable="true" spellcheck="false"
                class="text-xs text-slate-700 hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text mt-0.5"
                title="Klik untuk mengedit NIP">
-            {{ $event->nip_penandatangan ?: 'NIP. ....................................................' }}
-          </div>
-
-          {{-- POPOVER PILIHAN PENANDATANGAN & NIP (Hanya di layar, otomatis hilang saat cetak/PDF) --}}
-          <div id="signatoryDropdown"
-               onclick="event.stopPropagation()"
-               class="noprint hidden absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3.5 z-50 text-left">
-            
-            {{-- Header Dropdown --}}
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-              <div class="flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-[#174A9E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span class="font-bold text-xs text-[#0F2F5B]">Pilih Penandatangan & NIP</span>
-              </div>
-              <button type="button" onclick="closeSignatoryDropdown(event)" class="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 font-bold cursor-pointer">&times;</button>
-            </div>
-
-            {{-- Kolom Cari Cepat --}}
-            <div class="relative mb-2">
-              <input type="text" id="signatorySearchInput" oninput="filterSignatories()" 
-                     placeholder="Cari nama, jabatan, atau NIP/NRP..." 
-                     class="w-full text-xs pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#174A9E] outline-none">
-              <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            {{-- Container Daftar Penandatangan --}}
-            <div id="signatoryListContainer" class="max-h-60 overflow-y-auto space-y-1.5 pr-1 text-xs">
-              {{-- Diisi secara dinamis oleh JavaScript --}}
-            </div>
-
-            {{-- Footer Tombol Pintas Pengaturan Admin --}}
-            <div id="dropdownFooterActions" class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-              <a href="{{ route('admin.settings.index') }}#penandatangan" target="_blank"
-                 class="text-[#174A9E] hover:text-[#0F2F5B] font-semibold flex items-center gap-1 cursor-pointer">
-                <span>⚙️ Kelola Daftar Penandatangan</span>
-              </a>
-              <span id="saveStatusIndicator" class="text-[10px] text-emerald-600 font-medium hidden">
-                ✓ Tersimpan
-              </span>
-            </div>
-
+            {{ $event->nip_mengetahui ?: ($event->nip_penandatangan ?: 'NIP. 19750125 199412 1 001') }}
           </div>
         </div>
       </div>
+
+      {{-- KOLOM KANAN: PEMBUAT DAFTAR HADIR --}}
+      <div class="signature-col w-full sm:w-72 md:w-80 text-center relative">
+        {{-- Kota & Tanggal Pelaksanaan Acara --}}
+        <div id="signatoryPembuatCityDate" contenteditable="true" spellcheck="false" 
+             class="hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text font-normal"
+             title="Klik untuk mengedit kota & tanggal">
+          Surabaya, {{ \Carbon\Carbon::parse($event->event_date)->locale('id')->isoFormat('D MMMM Y') }}
+        </div>
+
+        {{-- Jabatan / Peran Pembuat --}}
+        <div id="signatoryPembuatJabatan" contenteditable="true" spellcheck="false"
+             class="font-normal hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text mt-0.5"
+             title="Klik untuk mengedit jabatan pembuat">
+          {{ $event->jabatan_pembuat ?: 'Pembuat Daftar Hadir,' }}
+        </div>
+
+        {{-- Ruang Tempat Tanda Tangan --}}
+        <div class="h-20 sm:h-24 flex items-center justify-center">
+          {{-- Ruang tanda tangan basah --}}
+        </div>
+
+        {{-- Nama Pembuat --}}
+        <div class="relative">
+          <div id="signatoryPembuatTrigger"
+               onclick="toggleSignatoryDropdown(event, 'pembuat')"
+               class="inline-flex items-center justify-center gap-1.5 group cursor-pointer hover:bg-amber-50/80 rounded-lg px-2 py-0.5 transition border border-transparent hover:border-amber-200"
+               title="Klik untuk memilih nama pembuat & NIP otomatis">
+            <span id="signatoryPembuatNameText" contenteditable="true" spellcheck="false"
+                  onclick="event.stopPropagation()"
+                  class="font-bold underline focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1 outline-none cursor-text text-sm">
+              {{ $event->nama_pembuat ?: (auth()->check() ? auth()->user()->name : 'Nama Pembuat') }}
+            </span>
+            <svg class="noprint w-3.5 h-3.5 text-slate-400 group-hover:text-[#174A9E] transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          {{-- NIP Pembuat --}}
+          <div id="signatoryPembuatNipText" contenteditable="true" spellcheck="false"
+               class="text-xs text-slate-700 hover:bg-amber-50 focus:bg-white focus:ring-1 focus:ring-blue-400 rounded px-1.5 py-0.5 transition outline-none cursor-text mt-0.5"
+               title="Klik untuk mengedit NIP">
+            {{ $event->nip_pembuat ?: 'NIP. ....................................................' }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {{-- POPOVER PILIHAN PENANDATANGAN & NIP (Dapat muncul di bawah Mengetahui maupun Pembuat) --}}
+    <div id="signatoryDropdown"
+         onclick="event.stopPropagation()"
+         class="noprint hidden absolute left-1/2 -translate-x-1/2 top-full mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 p-3.5 z-50 text-left">
+      
+      {{-- Header Dropdown --}}
+      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-[#174A9E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span id="dropdownTitle" class="font-bold text-xs text-[#0F2F5B]">Pilih Pejabat Penandatangan</span>
+        </div>
+        <button type="button" onclick="closeSignatoryDropdown(event)" class="text-slate-400 hover:text-slate-600 text-lg leading-none p-1 font-bold cursor-pointer">&times;</button>
+      </div>
+
+      {{-- Kolom Cari Cepat --}}
+      <div class="relative mb-2">
+        <input type="text" id="signatorySearchInput" oninput="filterSignatories()" 
+               placeholder="Cari nama, jabatan, atau NIP/NRP..." 
+               class="w-full text-xs pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#174A9E] outline-none">
+        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+
+      {{-- Container Daftar Penandatangan --}}
+      <div id="signatoryListContainer" class="max-h-60 overflow-y-auto space-y-1.5 pr-1 text-xs">
+        {{-- Diisi secara dinamis oleh JavaScript --}}
+      </div>
+
+      {{-- Footer Tombol Pintas Pengaturan Admin --}}
+      <div id="dropdownFooterActions" class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <a href="{{ route('admin.settings.index') }}#penandatangan" target="_blank"
+           class="text-[#174A9E] hover:text-[#0F2F5B] font-semibold flex items-center gap-1 cursor-pointer">
+          <span>⚙️ Kelola Daftar Penandatangan</span>
+        </a>
+        <span id="saveStatusIndicator" class="text-[10px] text-emerald-600 font-medium hidden">
+          ✓ Tersimpan
+        </span>
+      </div>
+
     </div>
 
   </div>
@@ -505,17 +574,25 @@
       }).join('');
     }
 
-    function toggleSignatoryDropdown(e, context = 'p1') {
+    let currentSignatoryContext = 'mengetahui'; // 'mengetahui' | 'pembuat'
+
+    function toggleSignatoryDropdown(e, context = 'mengetahui') {
       if (e) e.stopPropagation();
       const dropdown = document.getElementById('signatoryDropdown');
       if (!dropdown) return;
 
-      const targetParent = context === 'doc'
-        ? document.getElementById('signatoryNameTriggerDoc')?.parentElement
-        : document.getElementById('signatoryNameTrigger')?.parentElement;
+      currentSignatoryContext = context;
+      const titleEl = document.getElementById('dropdownTitle');
+      if (titleEl) {
+        titleEl.innerText = context === 'mengetahui' ? 'Pilih Pejabat Mengetahui' : 'Pilih Pembuat Daftar Hadir';
+      }
 
-      if (targetParent && dropdown.parentElement !== targetParent) {
-        targetParent.appendChild(dropdown);
+      const targetTrigger = context === 'mengetahui'
+        ? document.getElementById('signatoryMengetahuiTrigger')
+        : document.getElementById('signatoryPembuatTrigger');
+
+      if (targetTrigger && targetTrigger.parentElement && dropdown.parentElement !== targetTrigger.parentElement) {
+        targetTrigger.parentElement.appendChild(dropdown);
       }
 
       if (dropdown.classList.contains('hidden')) {
@@ -549,27 +626,45 @@
     }
 
     function selectSignatory(nama, jabatan, jenis, nomor) {
-      const nameEl = document.getElementById('signatoryNameText');
-      const nipEl = document.getElementById('signatoryNipText');
-      const jabatanEl = document.getElementById('signatoryJabatan');
-
-      const formattedJabatan = jabatan ? (jabatan.trim().endsWith(',') ? jabatan.trim() : jabatan.trim() + ',') : 'Ketua Panitia,';
+      const formattedJabatan = jabatan ? (jabatan.trim().endsWith(',') ? jabatan.trim() : jabatan.trim() + ',') : '';
       const formattedIdentitas = formatIdentitas(jenis, nomor) || 'NIP. ....................................................';
 
-      if (nameEl && nama) nameEl.innerText = nama;
-      if (jabatanEl) jabatanEl.innerText = formattedJabatan;
-      if (nipEl) nipEl.innerText = formattedIdentitas;
+      if (currentSignatoryContext === 'mengetahui') {
+        const nameEl = document.getElementById('signatoryMengetahuiNameText');
+        const nipEl = document.getElementById('signatoryMengetahuiNipText');
+        const jabatanEl = document.getElementById('signatoryMengetahuiJabatan');
+
+        if (nameEl && nama) nameEl.innerText = nama;
+        if (jabatanEl && formattedJabatan) jabatanEl.innerText = formattedJabatan;
+        if (nipEl) nipEl.innerText = formattedIdentitas;
+      } else {
+        const nameEl = document.getElementById('signatoryPembuatNameText');
+        const nipEl = document.getElementById('signatoryPembuatNipText');
+        const jabatanEl = document.getElementById('signatoryPembuatJabatan');
+
+        if (nameEl && nama) nameEl.innerText = nama;
+        if (jabatanEl && formattedJabatan) jabatanEl.innerText = formattedJabatan;
+        if (nipEl) nipEl.innerText = formattedIdentitas;
+      }
 
       closeSignatoryDropdown();
 
       // Simpan snapshot teks statis ke database event
-      saveSignatorySnapshot(nama, formattedJabatan, formattedIdentitas);
+      saveSignatorySnapshot();
     }
 
     let saveTimeout = null;
-    function saveSignatorySnapshot(nama, jabatan, nip) {
+    function saveSignatorySnapshot() {
       const indicator = document.getElementById('saveStatusIndicator');
       const headerIndicator = document.getElementById('autoSaveHeaderIndicator');
+
+      const namaMengetahui = document.getElementById('signatoryMengetahuiNameText')?.innerText?.trim() || '';
+      const jabatanMengetahui = document.getElementById('signatoryMengetahuiJabatan')?.innerText?.trim() || '';
+      const nipMengetahui = document.getElementById('signatoryMengetahuiNipText')?.innerText?.trim() || '';
+
+      const namaPembuat = document.getElementById('signatoryPembuatNameText')?.innerText?.trim() || '';
+      const jabatanPembuat = document.getElementById('signatoryPembuatJabatan')?.innerText?.trim() || '';
+      const nipPembuat = document.getElementById('signatoryPembuatNipText')?.innerText?.trim() || '';
 
       fetch("{{ route('admin.events.signatory.update', $event) }}", {
         method: "POST",
@@ -579,9 +674,15 @@
           "X-CSRF-TOKEN": "{{ csrf_token() }}"
         },
         body: JSON.stringify({
-          nama_penandatangan: nama,
-          jabatan_penandatangan: jabatan,
-          nip_penandatangan: nip
+          nama_mengetahui: namaMengetahui,
+          jabatan_mengetahui: jabatanMengetahui,
+          nip_mengetahui: nipMengetahui,
+          nama_pembuat: namaPembuat,
+          jabatan_pembuat: jabatanPembuat,
+          nip_pembuat: nipPembuat,
+          nama_penandatangan: namaMengetahui,
+          jabatan_penandatangan: jabatanMengetahui,
+          nip_penandatangan: nipMengetahui
         })
       })
       .then(res => res.json())
@@ -608,10 +709,7 @@
     function triggerAutoSave() {
       clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => {
-        const nama = document.getElementById('signatoryNameText')?.innerText?.trim() || '';
-        const jabatan = document.getElementById('signatoryJabatan')?.innerText?.trim() || '';
-        const nip = document.getElementById('signatoryNipText')?.innerText?.trim() || '';
-        saveSignatorySnapshot(nama, jabatan, nip);
+        saveSignatorySnapshot();
       }, 800);
     }
 
@@ -620,15 +718,13 @@
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
       // Pasang listener auto-save pada teks yang dapat diedit langsung
-      const cityP1 = document.getElementById('signatoryCityDate');
-      const jabP1 = document.getElementById('signatoryJabatan');
-      const nameP1 = document.getElementById('signatoryNameText');
-      const nipP1 = document.getElementById('signatoryNipText');
-
-      cityP1?.addEventListener('input', () => triggerAutoSave());
-      jabP1?.addEventListener('input', () => triggerAutoSave());
-      nameP1?.addEventListener('input', () => triggerAutoSave());
-      nipP1?.addEventListener('input', () => triggerAutoSave());
+      const elementsToListen = [
+        'signatoryMengetahuiJabatan', 'signatoryMengetahuiNameText', 'signatoryMengetahuiNipText',
+        'signatoryPembuatCityDate', 'signatoryPembuatJabatan', 'signatoryPembuatNameText', 'signatoryPembuatNipText'
+      ];
+      elementsToListen.forEach(id => {
+        document.getElementById(id)?.addEventListener('input', () => triggerAutoSave());
+      });
 
       // Ingat pilihan mode kop terakhir pengguna
       try {
@@ -666,9 +762,10 @@
     // Tutup dropdown jika klik di luar area
     document.addEventListener('click', function(e) {
       const dropdown = document.getElementById('signatoryDropdown');
-      const trigger = document.getElementById('signatoryNameTrigger');
+      const triggerMengetahui = document.getElementById('signatoryMengetahuiTrigger');
+      const triggerPembuat = document.getElementById('signatoryPembuatTrigger');
       if (dropdown && !dropdown.classList.contains('hidden')) {
-        if (!dropdown.contains(e.target) && !trigger?.contains(e.target)) {
+        if (!dropdown.contains(e.target) && !triggerMengetahui?.contains(e.target) && !triggerPembuat?.contains(e.target)) {
           closeSignatoryDropdown();
         }
       }

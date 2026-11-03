@@ -209,7 +209,7 @@
         <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
           <th class="px-3 py-3 w-8 text-center">#</th>
           <th class="px-3 py-3">Nama</th>
-          <th class="px-3 py-3">Divisi / Instansi / Tempat</th>
+          <th class="px-3 py-3">Divisi / Instansi & Jabatan</th>
           <th class="px-3 py-3">Kategori</th>
           <th class="px-3 py-3">No. Telp</th>
           <th class="px-3 py-3 text-center">L/P</th>
@@ -228,7 +228,14 @@
               {{ $a->nama }}
             </td>
             <td class="px-3 py-3 text-xs text-slate-600">
-              {{ $a->divisi ?: ($a->nama_instansi ?: '-') }}
+              @if($a->kategori_instansi === 'internal')
+                <span>{{ $a->divisi ?: '-' }}</span>
+              @else
+                <span class="font-semibold text-slate-700">{{ $a->nama_instansi ?: '-' }}</span>
+                @if($a->jabatan)
+                  <div class="text-[11px] text-slate-500 font-normal mt-0.5">{{ $a->jabatan }}</div>
+                @endif
+              @endif
             </td>
             <td class="px-3 py-3">
               <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg {{ $a->kategori_instansi === 'internal' ? 'bg-[#EAF0FA] text-[#0F2F5B]' : 'bg-amber-50 text-amber-700' }}">
@@ -386,6 +393,10 @@
     <div id="wrapEditInstansi">
       <label class="text-xs font-bold text-[#0F2F5B]">Asal Instansi / Lembaga / Tempat</label>
       <input type="text" name="nama_instansi" id="editNamaInstansi" maxlength="150" class="input-bnn mt-1 text-xs" placeholder="cth. Dinas Kesehatan / SMAN 5 / Kel. Barata Jaya">
+    </div>
+    <div id="wrapEditJabatan">
+      <label class="text-xs font-bold text-[#0F2F5B]">Jabatan</label>
+      <input type="text" name="jabatan" id="editJabatan" maxlength="150" class="input-bnn mt-1 text-xs" placeholder="cth. Staf / Kasubbag / Guru / Anggota">
     </div>
     <div class="grid grid-cols-2 gap-3">
       <div>
@@ -555,8 +566,10 @@ function previewPhoto(url, title, deleteUrl) {
 }
 
 function toggleEditFields(val) {
-  document.getElementById('wrapEditDivisi').style.display = val === 'eksternal' ? 'none' : '';
-  document.getElementById('wrapEditInstansi').style.display = val === 'internal' ? 'none' : '';
+  const isInternal = val === 'internal';
+  document.getElementById('wrapEditDivisi').style.display = isInternal ? '' : 'none';
+  document.getElementById('wrapEditInstansi').style.display = isInternal ? 'none' : '';
+  document.getElementById('wrapEditJabatan').style.display = isInternal ? 'none' : '';
 }
 document.getElementById('editKatInternal').addEventListener('change', () => toggleEditFields('internal'));
 document.getElementById('editKatEksternal').addEventListener('change', () => toggleEditFields('eksternal'));
@@ -587,6 +600,7 @@ function openEditAttendeeModal(a) {
   }
 
   document.getElementById('editNamaInstansi').value = a.nama_instansi || '';
+  document.getElementById('editJabatan').value = a.jabatan || '';
 
   if (a.kategori_instansi === 'internal') {
     document.getElementById('editKatInternal').checked = true;

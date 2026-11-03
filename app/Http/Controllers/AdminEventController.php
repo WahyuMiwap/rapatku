@@ -117,6 +117,7 @@ class AdminEventController extends Controller
             ->when($q, fn ($query) => $query->where(function ($w) use ($escapedQ) {
                 $w->where('nama', 'like', "%{$escapedQ}%")
                     ->orWhere('nama_instansi', 'like', "%{$escapedQ}%")
+                    ->orWhere('jabatan', 'like', "%{$escapedQ}%")
                     ->orWhere('no_telp', 'like', "%{$escapedQ}%");
             }))
             ->orderByDesc('id')
@@ -273,26 +274,68 @@ class AdminEventController extends Controller
         return view('admin.events.rekap', compact('event', 'attendees', 'signatories'));
     }
 
-    /** Simpan snapshot teks penandatangan langsung ke data laporan event */
+    /** Simpan snapshot teks penandatangan (mengetahui & pembuat) langsung ke data laporan event */
     public function updateSignatorySnapshot(Request $request, Event $event)
     {
         $validated = $request->validate([
+            'nama_mengetahui' => ['nullable', 'string', 'max:150'],
+            'jabatan_mengetahui' => ['nullable', 'string', 'max:150'],
+            'nip_mengetahui' => ['nullable', 'string', 'max:100'],
+            'nama_pembuat' => ['nullable', 'string', 'max:150'],
+            'jabatan_pembuat' => ['nullable', 'string', 'max:150'],
+            'nip_pembuat' => ['nullable', 'string', 'max:100'],
             'nama_penandatangan' => ['nullable', 'string', 'max:150'],
             'jabatan_penandatangan' => ['nullable', 'string', 'max:150'],
             'nip_penandatangan' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $event->update([
-            'nama_penandatangan' => $validated['nama_penandatangan'] ?? null,
-            'jabatan_penandatangan' => $validated['jabatan_penandatangan'] ?? null,
-            'nip_penandatangan' => $validated['nip_penandatangan'] ?? null,
-        ]);
+        $updateData = [];
+
+        if ($request->has('nama_mengetahui')) {
+            $updateData['nama_mengetahui'] = $validated['nama_mengetahui'] ?? null;
+        } elseif ($request->has('nama_penandatangan')) {
+            $updateData['nama_mengetahui'] = $validated['nama_penandatangan'] ?? null;
+        }
+
+        if ($request->has('jabatan_mengetahui')) {
+            $updateData['jabatan_mengetahui'] = $validated['jabatan_mengetahui'] ?? null;
+        } elseif ($request->has('jabatan_penandatangan')) {
+            $updateData['jabatan_mengetahui'] = $validated['jabatan_penandatangan'] ?? null;
+        }
+
+        if ($request->has('nip_mengetahui')) {
+            $updateData['nip_mengetahui'] = $validated['nip_mengetahui'] ?? null;
+        } elseif ($request->has('nip_penandatangan')) {
+            $updateData['nip_mengetahui'] = $validated['nip_penandatangan'] ?? null;
+        }
+
+        if ($request->has('nama_pembuat')) {
+            $updateData['nama_pembuat'] = $validated['nama_pembuat'] ?? null;
+        }
+        if ($request->has('jabatan_pembuat')) {
+            $updateData['jabatan_pembuat'] = $validated['jabatan_pembuat'] ?? null;
+        }
+        if ($request->has('nip_pembuat')) {
+            $updateData['nip_pembuat'] = $validated['nip_pembuat'] ?? null;
+        }
+
+        if (isset($updateData['nama_mengetahui'])) {
+            $updateData['nama_penandatangan'] = $updateData['nama_mengetahui'];
+            $updateData['jabatan_penandatangan'] = $updateData['jabatan_mengetahui'] ?? null;
+            $updateData['nip_penandatangan'] = $updateData['nip_mengetahui'] ?? null;
+        }
+
+        $event->update($updateData);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'ok' => true,
                 'message' => 'Penandatangan laporan berhasil disimpan.',
-                'event' => $event->only(['nama_penandatangan', 'jabatan_penandatangan', 'nip_penandatangan']),
+                'event' => $event->only([
+                    'nama_mengetahui', 'jabatan_mengetahui', 'nip_mengetahui',
+                    'nama_pembuat', 'jabatan_pembuat', 'nip_pembuat',
+                    'nama_penandatangan', 'jabatan_penandatangan', 'nip_penandatangan'
+                ]),
             ]);
         }
 
@@ -362,7 +405,8 @@ class AdminEventController extends Controller
             $sheet->setCellValue('B' . $r, $this->sanitizeSpreadsheet($a->nama));
             $sheet->setCellValue('C' . $r, $a->jenis_kelamin);
             $sheet->setCellValue('D' . $r, ucfirst($a->kategori_instansi));
-            $sheet->setCellValue('E' . $r, $this->sanitizeSpreadsheet($a->divisi ?: $a->nama_instansi));
+            $instansiText = $a->divisi ?: ($a->nama_instansi . ($a->jabatan ? ' (' . $a->jabatan . ')' : ''));
+            $sheet->setCellValue('E' . $r, $this->sanitizeSpreadsheet($instansiText));
             $sheet->setCellValue('F' . $r, $this->sanitizeSpreadsheet($a->no_telp));
             $sheet->setCellValue('G' . $r, $a->created_at?->format('d/m/Y H:i'));
 

@@ -11,6 +11,8 @@ class Event extends Model
     protected $fillable = [
         'uuid', 'slug', 'title', 'event_date', 'category', 'logo_path', 'is_active',
         'nama_penandatangan', 'jabatan_penandatangan', 'nip_penandatangan',
+        'nama_mengetahui', 'jabatan_mengetahui', 'nip_mengetahui',
+        'nama_pembuat', 'jabatan_pembuat', 'nip_pembuat',
     ];
 
     protected static function booted(): void

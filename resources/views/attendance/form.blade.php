@@ -47,6 +47,10 @@
           <label class="text-sm font-bold text-[#0F2F5B]">Asal Instansi / Lembaga / Tempat <span class="text-red-500">*</span></label>
           <input name="nama_instansi" id="inputNamaInstansi" value="{{ old('nama_instansi') }}" maxlength="150" class="input-bnn mt-1" placeholder="cth. Dinas Kesehatan / SMAN 5 / Kelurahan Barata Jaya">
         </div>
+        <div id="wrapJabatan">
+          <label class="text-sm font-bold text-[#0F2F5B]">Jabatan <span class="text-red-500">*</span></label>
+          <input name="jabatan" id="inputJabatan" value="{{ old('jabatan') }}" maxlength="150" class="input-bnn mt-1" placeholder="cth. Staf / Kasubbag / Kepala / Guru / Anggota">
+        </div>
         <div>
           <label class="text-sm font-bold text-[#0F2F5B]">No. HP / WA <span class="text-red-500">*</span></label>
           <input name="no_telp" value="{{ old('no_telp') }}" required inputmode="tel" class="input-bnn mt-1" placeholder="cth 0812xxxx">
@@ -106,13 +110,17 @@ function toggleFields() {
   const isInternal = v === 'internal';
   const wrapDivisi = document.getElementById('wrapDivisi');
   const wrapInstansi = document.getElementById('wrapInstansi');
+  const wrapJabatan = document.getElementById('wrapJabatan');
   const selectDivisi = document.getElementById('selectDivisi');
   const inputInstansi = document.getElementById('inputNamaInstansi');
+  const inputJabatan = document.getElementById('inputJabatan');
 
   if (wrapDivisi) wrapDivisi.style.display = isInternal ? '' : 'none';
   if (wrapInstansi) wrapInstansi.style.display = isInternal ? 'none' : '';
+  if (wrapJabatan) wrapJabatan.style.display = isInternal ? 'none' : '';
   if (selectDivisi) selectDivisi.required = isInternal;
   if (inputInstansi) inputInstansi.required = !isInternal;
+  if (inputJabatan) inputJabatan.required = !isInternal;
 }
 radios.forEach(r => r.addEventListener('change', toggleFields));
 toggleFields();

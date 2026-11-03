@@ -27,6 +27,7 @@ class AdminAttendeeController extends Controller
             'nama' => ['required', 'string', 'min:3', 'max:100'],
             'divisi' => ['required_if:kategori_instansi,internal', 'nullable', 'string', 'max:100'],
             'nama_instansi' => ['required_if:kategori_instansi,eksternal', 'nullable', 'string', 'max:150'],
+            'jabatan' => ['required_if:kategori_instansi,eksternal', 'nullable', 'string', 'max:150'],
             'no_telp' => [
                 'required', 'digits_between:10,15',
                 Rule::unique('attendees')->where('event_id', $attendee->event_id)->ignore($attendee->id),
@@ -35,6 +36,7 @@ class AdminAttendeeController extends Controller
         ], [
             'no_telp.unique' => 'Nomor ini sudah tercatat untuk peserta lain pada rapat ini.',
             'nama_instansi.required_if' => 'Asal instansi / lembaga / tempat wajib diisi untuk peserta eksternal.',
+            'jabatan.required_if' => 'Jabatan wajib diisi untuk peserta eksternal.',
             'divisi.required_if' => 'Divisi / bidang wajib dipilih untuk peserta internal.',
         ]);
 
@@ -43,6 +45,7 @@ class AdminAttendeeController extends Controller
             'nama' => $validated['nama'],
             'divisi' => $validated['kategori_instansi'] === 'internal' ? ($validated['divisi'] ?? null) : null,
             'nama_instansi' => $validated['kategori_instansi'] === 'eksternal' ? ($validated['nama_instansi'] ?? null) : null,
+            'jabatan' => $validated['kategori_instansi'] === 'eksternal' ? ($validated['jabatan'] ?? null) : null,
             'no_telp' => $validated['no_telp'],
             'jenis_kelamin' => $validated['jenis_kelamin'],
         ]);

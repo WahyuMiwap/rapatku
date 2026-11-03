@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class Attendee extends Model
 {
     protected $fillable = [
-        'uuid', 'event_id', 'kategori_instansi', 'nama', 'divisi', 'nama_instansi',
+        'uuid', 'event_id', 'kategori_instansi', 'nama', 'divisi', 'nama_instansi', 'jabatan',
         'no_telp', 'jenis_kelamin', 'agree_resume', 'agree_daftar_hadir',
         'signature_path',
     ];
