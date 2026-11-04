@@ -662,7 +662,7 @@ function toggleEditFields(val) {
   const isInternal = val === 'internal';
   document.getElementById('wrapEditDivisi').style.display = isInternal ? '' : 'none';
   document.getElementById('wrapEditInstansi').style.display = isInternal ? 'none' : '';
-  document.getElementById('wrapEditJabatan').style.display = isInternal ? 'none' : '';
+  document.getElementById('wrapEditJabatan').style.display = '';
 }
 document.getElementById('editKatInternal').addEventListener('change', () => toggleEditFields('internal'));
 document.getElementById('editKatEksternal').addEventListener('change', () => toggleEditFields('eksternal'));

@@ -110,7 +110,7 @@ class AttendanceController extends Controller
                     'nama' => $validated['nama'],
                     'divisi' => $validated['kategori_instansi'] === 'internal' ? ($validated['divisi'] ?? null) : null,
                     'nama_instansi' => $validated['kategori_instansi'] === 'eksternal' ? ($validated['nama_instansi'] ?? null) : null,
-                    'jabatan' => $validated['kategori_instansi'] === 'eksternal' ? ($validated['jabatan'] ?? null) : null,
+                    'jabatan' => $validated['jabatan'] ?? null,
                     'no_telp' => $validated['no_telp'],
                     'jenis_kelamin' => $validated['jenis_kelamin'],
                     'signature_path' => $path,

@@ -281,10 +281,25 @@ class AdminEventController extends Controller
     public function rekap(Event $event)
     {
         $event->load('photos');
-        $attendees = $event->attendees()->orderBy('id')->get();
-        $attendeesInternal = $attendees->where('kategori_instansi', 'internal')->values();
-        $attendeesEksternal = $attendees->where('kategori_instansi', 'eksternal')->values();
         $signatories = Signatory::active()->orderBy('nama_lengkap')->get();
+        $attendees = $event->attendees()->orderBy('id')->get();
+
+        // Urutkan peserta internal berdasarkan protokoler dinas:
+        // 1. Kepala / Ketua BNN Kota Surabaya
+        // 2. Wakil Kepala / Wakil Ketua BNN
+        // 3. Pegawai & staf internal lainnya (sesuai urutan kehadiran)
+        $attendeesInternal = $attendees->where('kategori_instansi', 'internal')
+            ->sort(function ($a, $b) use ($signatories) {
+                $rankA = Attendee::getHierarchyRank($a, $signatories);
+                $rankB = Attendee::getHierarchyRank($b, $signatories);
+                if ($rankA === $rankB) {
+                    return ($a->id ?? 0) <=> ($b->id ?? 0);
+                }
+                return $rankA <=> $rankB;
+            })
+            ->values();
+
+        $attendeesEksternal = $attendees->where('kategori_instansi', 'eksternal')->values();
 
         return view('admin.events.rekap', compact('event', 'attendees', 'attendeesInternal', 'attendeesEksternal', 'signatories'));
     }
@@ -363,7 +378,19 @@ class AdminEventController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(180);
 
-        $rows = $event->attendees()->orderBy('id')->get();
+        $signatories = Signatory::active()->get();
+        $internalRows = $event->attendees()->where('kategori_instansi', 'internal')->orderBy('id')->get()
+            ->sort(function ($a, $b) use ($signatories) {
+                $rankA = Attendee::getHierarchyRank($a, $signatories);
+                $rankB = Attendee::getHierarchyRank($b, $signatories);
+                if ($rankA === $rankB) {
+                    return ($a->id ?? 0) <=> ($b->id ?? 0);
+                }
+                return $rankA <=> $rankB;
+            })
+            ->values();
+        $eksternalRows = $event->attendees()->where('kategori_instansi', 'eksternal')->orderBy('id')->get();
+        $rows = $internalRows->concat($eksternalRows);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();

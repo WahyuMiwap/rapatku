@@ -243,7 +243,16 @@
             <tr>
               <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
               <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
-              <td class="border border-slate-400 px-3 py-2">{{ $a->divisi ?: '-' }}</td>
+              <td class="border border-slate-400 px-3 py-2">
+                @if($a->divisi)
+                  <span>{{ $a->divisi }}</span>
+                @endif
+                @if($a->jabatan)
+                  <div class="text-[11px] text-slate-600 font-normal {{ $a->divisi ? '' : 'font-medium text-slate-800' }}">({{ $a->jabatan }})</div>
+                @elseif(!$a->divisi)
+                  <span>-</span>
+                @endif
+              </td>
               <td class="border border-slate-400 px-3 py-2 text-center">{{ $a->no_telp }}</td>
               <td class="border border-slate-400 px-2 py-2 text-center">{{ $a->jenis_kelamin }}</td>
               <td class="border border-slate-400 px-3 py-1.5 text-center">
