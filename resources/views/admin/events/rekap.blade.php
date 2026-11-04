@@ -196,94 +196,121 @@
       </p>
     </div>
 
-    {{-- BAGIAN 1: TABEL PESERTA INTERNAL BNN --}}
-    <div class="mt-4">
-      <div class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wide pb-1 flex items-center justify-between border-b border-slate-300">
-        <span>A. Peserta Internal BNN Kota Surabaya</span>
-        <span class="text-xs font-normal text-slate-500">({{ $attendeesInternal->count() }} Orang)</span>
-      </div>
-      <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400 mt-2">
-        <thead>
-          <tr class="bg-[#EDF2F9] text-slate-800">
-            <th class="border border-slate-400 px-2 py-2 text-center w-10">No</th>
-            <th class="border border-slate-400 px-3 py-2 text-left">Nama Lengkap</th>
-            <th class="border border-slate-400 px-3 py-2 text-left">Divisi / Bidang</th>
-            <th class="border border-slate-400 px-3 py-2 text-center">No. Telp</th>
-            <th class="border border-slate-400 px-2 py-2 text-center w-12">L/P</th>
-            <th class="border border-slate-400 px-3 py-2 text-center w-36">Tanda Tangan</th>
-          </tr>
-        </thead>
-        <tbody>
-        @forelse($attendeesInternal as $i => $a)
-          <tr>
-            <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
-            <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
-            <td class="border border-slate-400 px-3 py-2">{{ $a->divisi ?: '-' }}</td>
-            <td class="border border-slate-400 px-3 py-2 text-center">{{ $a->no_telp }}</td>
-            <td class="border border-slate-400 px-2 py-2 text-center">{{ $a->jenis_kelamin }}</td>
-            <td class="border border-slate-400 px-3 py-1.5 text-center">
-              @if($a->signature_path)
-                <img src="{{ route('admin.attendees.signature', $a) }}" class="h-10 sm:h-12 inline object-contain max-w-[120px]" alt="TTD {{ $a->nama }}">
-              @else
-                <span class="text-slate-400 text-xs italic">-</span>
-              @endif
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" class="border border-slate-400 p-4 text-center text-slate-400 italic">Tidak ada peserta internal pada rapat ini.</td>
-          </tr>
-        @endforelse
-        </tbody>
-      </table>
-    </div>
+    {{-- DAFTAR TABEL PESERTA RAPAT --}}
+    @php
+      $hasInternal = $attendeesInternal->isNotEmpty();
+      $hasEksternal = $attendeesEksternal->isNotEmpty();
+    @endphp
 
-    {{-- BAGIAN 2: TABEL PESERTA EKSTERNAL --}}
-    <div class="mt-6">
-      <div class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wide pb-1 flex items-center justify-between border-b border-slate-300">
-        <span>B. Peserta Eksternal / Tamu Undangan</span>
-        <span class="text-xs font-normal text-slate-500">({{ $attendeesEksternal->count() }} Orang)</span>
+    @if(!$hasInternal && !$hasEksternal)
+      {{-- KONDISI JIKA BELUM ADA PESERTA SAMA SEKALI --}}
+      <div class="mt-4">
+        <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400 mt-2">
+          <tbody>
+            <tr>
+              <td class="border border-slate-400 p-6 text-center text-slate-400 italic">Belum ada peserta yang hadir pada rapat ini.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400 mt-2">
-        <thead>
-          <tr class="bg-[#EDF2F9] text-slate-800">
-            <th class="border border-slate-400 px-2 py-2 text-center w-10">No</th>
-            <th class="border border-slate-400 px-3 py-2 text-left">Nama Lengkap</th>
-            <th class="border border-slate-400 px-3 py-2 text-left">Asal Instansi & Jabatan</th>
-            <th class="border border-slate-400 px-3 py-2 text-center">No. Telp</th>
-            <th class="border border-slate-400 px-2 py-2 text-center w-12">L/P</th>
-            <th class="border border-slate-400 px-3 py-2 text-center w-36">Tanda Tangan</th>
-          </tr>
-        </thead>
-        <tbody>
-        @forelse($attendeesEksternal as $i => $a)
-          <tr>
-            <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
-            <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
-            <td class="border border-slate-400 px-3 py-2">
-              <span class="font-medium text-slate-900">{{ $a->nama_instansi ?: '-' }}</span>
-              @if($a->jabatan)
-                <div class="text-[11px] text-slate-600 font-normal">({{ $a->jabatan }})</div>
-              @endif
-            </td>
-            <td class="border border-slate-400 px-3 py-2 text-center">{{ $a->no_telp }}</td>
-            <td class="border border-slate-400 px-2 py-2 text-center">{{ $a->jenis_kelamin }}</td>
-            <td class="border border-slate-400 px-3 py-1.5 text-center">
-              @if($a->signature_path)
-                <img src="{{ route('admin.attendees.signature', $a) }}" class="h-10 sm:h-12 inline object-contain max-w-[120px]" alt="TTD {{ $a->nama }}">
-              @else
-                <span class="text-slate-400 text-xs italic">-</span>
-              @endif
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="6" class="border border-slate-400 p-4 text-center text-slate-400 italic">Tidak ada peserta eksternal pada rapat ini.</td>
-          </tr>
-        @endforelse
-        </tbody>
-      </table>
-    </div>
+    @else
+      {{-- BAGIAN 1: TABEL PESERTA INTERNAL BNN (Hanya jika ada peserta internal) --}}
+      @if($hasInternal)
+      <div class="mt-4">
+        <div class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wide pb-1 flex items-center justify-between border-b border-slate-300">
+          <span>
+            @if($hasEksternal)
+              A. Peserta Internal BNN Kota Surabaya
+            @else
+              Peserta Rapat (Internal BNN Kota Surabaya)
+            @endif
+          </span>
+          <span class="text-xs font-normal text-slate-500">({{ $attendeesInternal->count() }} Orang)</span>
+        </div>
+        <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400 mt-2">
+          <thead>
+            <tr class="bg-[#EDF2F9] text-slate-800">
+              <th class="border border-slate-400 px-2 py-2 text-center w-10">No</th>
+              <th class="border border-slate-400 px-3 py-2 text-left">Nama Lengkap</th>
+              <th class="border border-slate-400 px-3 py-2 text-left">Divisi / Bidang</th>
+              <th class="border border-slate-400 px-3 py-2 text-center">No. Telp</th>
+              <th class="border border-slate-400 px-2 py-2 text-center w-12">L/P</th>
+              <th class="border border-slate-400 px-3 py-2 text-center w-36">Tanda Tangan</th>
+            </tr>
+          </thead>
+          <tbody>
+          @foreach($attendeesInternal as $i => $a)
+            <tr>
+              <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
+              <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
+              <td class="border border-slate-400 px-3 py-2">{{ $a->divisi ?: '-' }}</td>
+              <td class="border border-slate-400 px-3 py-2 text-center">{{ $a->no_telp }}</td>
+              <td class="border border-slate-400 px-2 py-2 text-center">{{ $a->jenis_kelamin }}</td>
+              <td class="border border-slate-400 px-3 py-1.5 text-center">
+                @if($a->signature_path)
+                  <img src="{{ route('admin.attendees.signature', $a) }}" class="h-10 sm:h-12 inline object-contain max-w-[120px]" alt="TTD {{ $a->nama }}">
+                @else
+                  <span class="text-slate-400 text-xs italic">-</span>
+                @endif
+              </td>
+            </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
+      @endif
+
+      {{-- BAGIAN 2: TABEL PESERTA EKSTERNAL (Otomatis disembunyikan jika tidak ada peserta eksternal) --}}
+      @if($hasEksternal)
+      <div class="mt-6">
+        <div class="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wide pb-1 flex items-center justify-between border-b border-slate-300">
+          <span>
+            @if($hasInternal)
+              B. Peserta Eksternal / Tamu Undangan
+            @else
+              Peserta Eksternal / Tamu Undangan
+            @endif
+          </span>
+          <span class="text-xs font-normal text-slate-500">({{ $attendeesEksternal->count() }} Orang)</span>
+        </div>
+        <table class="w-full text-xs sm:text-sm border-collapse border border-slate-400 mt-2">
+          <thead>
+            <tr class="bg-[#EDF2F9] text-slate-800">
+              <th class="border border-slate-400 px-2 py-2 text-center w-10">No</th>
+              <th class="border border-slate-400 px-3 py-2 text-left">Nama Lengkap</th>
+              <th class="border border-slate-400 px-3 py-2 text-left">Asal Instansi & Jabatan</th>
+              <th class="border border-slate-400 px-3 py-2 text-center">No. Telp</th>
+              <th class="border border-slate-400 px-2 py-2 text-center w-12">L/P</th>
+              <th class="border border-slate-400 px-3 py-2 text-center w-36">Tanda Tangan</th>
+            </tr>
+          </thead>
+          <tbody>
+          @foreach($attendeesEksternal as $i => $a)
+            <tr>
+              <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
+              <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
+              <td class="border border-slate-400 px-3 py-2">
+                <span class="font-medium text-slate-900">{{ $a->nama_instansi ?: '-' }}</span>
+                @if($a->jabatan)
+                  <div class="text-[11px] text-slate-600 font-normal">({{ $a->jabatan }})</div>
+                @endif
+              </td>
+              <td class="border border-slate-400 px-3 py-2 text-center">{{ $a->no_telp }}</td>
+              <td class="border border-slate-400 px-2 py-2 text-center">{{ $a->jenis_kelamin }}</td>
+              <td class="border border-slate-400 px-3 py-1.5 text-center">
+                @if($a->signature_path)
+                  <img src="{{ route('admin.attendees.signature', $a) }}" class="h-10 sm:h-12 inline object-contain max-w-[120px]" alt="TTD {{ $a->nama }}">
+                @else
+                  <span class="text-slate-400 text-xs italic">-</span>
+                @endif
+              </td>
+            </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
+      @endif
+    @endif
 
     {{-- Struktur Tanda Tangan Formal (2 Pihak: Mengetahui & Pembuat) --}}
     <div class="signatures-container mt-8 flex flex-col sm:flex-row justify-between items-start gap-8 sm:gap-4 text-sm leading-relaxed text-slate-800">
