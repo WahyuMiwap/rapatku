@@ -212,9 +212,9 @@
   </div>
 
   {{-- =========================================================================
-       ATAS TABEL: TULISAN & TAB FILTER INTERNAL DAN EKSTERNAL
+       ATAS TABEL: TAB FILTER INTERNAL DAN EKSTERNAL
        ========================================================================= --}}
-  <div class="mt-5 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+  <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-center">
     <div class="inline-flex p-1 bg-slate-100 rounded-2xl gap-1">
       <a href="{{ route('admin.events.show', ['event' => $event, 'q' => $q, 'kategori' => 'all']) }}"
          onclick="filterClientTab(event, 'all')"
@@ -237,16 +237,6 @@
         <span>Eksternal</span>
         <span class="text-xs font-semibold tabular opacity-80">{{ $eksternal }}</span>
       </a>
-    </div>
-
-    <div id="tabSummaryText" class="text-xs text-slate-500 font-medium">
-      @if($kategori === 'internal')
-        Menampilkan peserta <strong>Internal BNN</strong> ({{ $internal }} orang)
-      @elseif($kategori === 'eksternal')
-        Menampilkan peserta <strong>Eksternal</strong> ({{ $eksternal }} orang)
-      @else
-        Menampilkan <strong>seluruh peserta</strong> ({{ $internal }} Internal, {{ $eksternal }} Eksternal)
-      @endif
     </div>
   </div>
 
@@ -635,17 +625,6 @@ function filterClientTab(e, kat) {
       t.btn.classList.add('text-slate-600');
     }
   });
-
-  const summary = document.getElementById('tabSummaryText');
-  if (summary) {
-    if (kat === 'internal') {
-      summary.innerHTML = 'Menampilkan peserta <strong>Internal BNN</strong> ({{ $internal }} orang)';
-    } else if (kat === 'eksternal') {
-      summary.innerHTML = 'Menampilkan peserta <strong>Eksternal</strong> ({{ $eksternal }} orang)';
-    } else {
-      summary.innerHTML = 'Menampilkan <strong>seluruh peserta</strong> ({{ $internal }} Internal, {{ $eksternal }} Eksternal)';
-    }
-  }
 
   const rows = document.querySelectorAll('.attendee-row');
   let visibleCount = 0;
