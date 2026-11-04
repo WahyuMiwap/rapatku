@@ -18,7 +18,7 @@
             </div>
             <div>
               <div class="font-extrabold text-sm leading-none text-white tracking-wide">Rapatku</div>
-              <div class="text-[10px] font-bold tracking-[0.22em] uppercase text-blue-200/70 mt-1">BNN</div>
+              <div class="text-[10px] font-bold tracking-[0.22em] uppercase text-blue-200/70 mt-1">BNN KOTA SURABAYA</div>
             </div>
           </a>
                     <nav class="mt-8 space-y-1.5 text-xs">

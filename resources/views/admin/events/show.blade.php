@@ -175,20 +175,33 @@
   </div>
 </section>
 
-{{-- KONTROL FILTER & AKSI PESERTA --}}
+{{-- =========================================================================
+     DAFTAR PESERTA (1 WADAH TERPADU DENGAN FILTER INTERNAL & EKSTERNAL DI ATAS TABEL)
+     ========================================================================= --}}
 <section class="card mt-4 p-5 sm:p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+  {{-- Baris Atas: Judul, Ringkasan, & Form Pencarian --}}
   <div class="flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h2 class="font-bold text-base sm:text-lg text-[#0F2F5B]">Daftar Kehadiran Peserta</h2>
-      <p class="text-xs text-slate-400 mt-0.5">Total {{ $total }} peserta terdaftar ({{ $internal }} Internal BNN, {{ $eksternal }} Eksternal)</p>
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-2xl bg-[#EAF0FA] text-[#174A9E] flex items-center justify-center font-bold shadow-2xs">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </div>
+      <div>
+        <h2 class="font-bold text-base sm:text-lg text-[#0F2F5B]">Daftar Peserta Rapat</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Total {{ $total }} peserta terdaftar</p>
+      </div>
     </div>
     <div class="flex flex-wrap items-center gap-2">
       <form method="GET" class="flex gap-2">
         <input name="q" value="{{ $q }}" placeholder="Cari nama, instansi, divisi..."
                class="input-bnn text-sm !py-2 w-44 sm:w-56">
+        @if($kategori && $kategori !== 'all')
+          <input type="hidden" name="kategori" value="{{ $kategori }}">
+        @endif
         <button class="btn-bnn !py-2 text-xs">Cari</button>
         @if($q)
-          <a href="{{ route('admin.events.show', $event) }}" class="btn-soft !py-2 text-xs">Reset</a>
+          <a href="{{ route('admin.events.show', ['event' => $event, 'kategori' => $kategori]) }}" class="btn-soft !py-2 text-xs">Reset</a>
         @endif
       </form>
       <a href="{{ route('admin.events.rekap', $event) }}" target="_blank" class="btn-soft !py-2 text-xs inline-flex items-center gap-1.5 border border-slate-200 hover:bg-slate-100 transition shadow-sm font-semibold text-slate-700">
@@ -205,159 +218,100 @@
       </a>
     </div>
   </div>
-</section>
 
-{{-- =========================================================================
-     TABEL 1 (ATAS): DAFTAR PESERTA INTERNAL (BNN)
-     ========================================================================= --}}
-<section class="card mt-4 p-5 sm:p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
-  <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#174A9E] flex items-center justify-center font-bold">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h3 class="font-bold text-sm sm:text-base text-[#0F2F5B]">1. Daftar Peserta Internal BNN</h3>
-          <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-[#EAF0FA] text-[#174A9E]">
-            {{ $attendeesInternal->total() }} Orang
-          </span>
-        </div>
-        <p class="text-xs text-slate-400 mt-0.5">Pegawai & staf internal lingkungan BNN Kota Surabaya</p>
-      </div>
+  {{-- =========================================================================
+       ATAS TABEL: TULISAN & TAB FILTER INTERNAL DAN EKSTERNAL
+       ========================================================================= --}}
+  <div class="mt-5 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+    <div class="inline-flex p-1 bg-slate-100 rounded-2xl gap-1">
+      <a href="{{ route('admin.events.show', ['event' => $event, 'q' => $q, 'kategori' => 'all']) }}"
+         onclick="filterClientTab(event, 'all')"
+         id="btnTabAll"
+         class="tab-attendee-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $kategori === 'all' ? 'bg-white text-[#0F2F5B] shadow-xs' : 'text-slate-600 hover:text-[#0F2F5B]' }}">
+        <span>Semua</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] {{ $kategori === 'all' ? 'bg-[#EAF0FA] text-[#174A9E]' : 'bg-slate-200/80 text-slate-700' }} font-extrabold">{{ $total }}</span>
+      </a>
+      <a href="{{ route('admin.events.show', ['event' => $event, 'q' => $q, 'kategori' => 'internal']) }}"
+         onclick="filterClientTab(event, 'internal')"
+         id="btnTabInternal"
+         class="tab-attendee-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $kategori === 'internal' ? 'bg-white text-[#0F2F5B] shadow-xs' : 'text-slate-600 hover:text-[#0F2F5B]' }}">
+        <span>Internal</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-100 text-[#174A9E] font-extrabold">{{ $internal }}</span>
+      </a>
+      <a href="{{ route('admin.events.show', ['event' => $event, 'q' => $q, 'kategori' => 'eksternal']) }}"
+         onclick="filterClientTab(event, 'eksternal')"
+         id="btnTabEksternal"
+         class="tab-attendee-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $kategori === 'eksternal' ? 'bg-white text-[#0F2F5B] shadow-xs' : 'text-slate-600 hover:text-[#0F2F5B]' }}">
+        <span>Eksternal</span>
+        <span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-extrabold">{{ $eksternal }}</span>
+      </a>
+    </div>
+
+    <div id="tabSummaryText" class="text-xs text-slate-500 font-medium">
+      @if($kategori === 'internal')
+        Menampilkan peserta <strong>Internal BNN</strong> ({{ $internal }} orang)
+      @elseif($kategori === 'eksternal')
+        Menampilkan peserta <strong>Eksternal</strong> ({{ $eksternal }} orang)
+      @else
+        Menampilkan <strong>seluruh peserta</strong> ({{ $internal }} Internal, {{ $eksternal }} Eksternal)
+      @endif
     </div>
   </div>
 
-  <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-100">
-    <table class="w-full text-sm min-w-[700px]">
+  {{-- Tabel Presensi Peserta --}}
+  <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-100">
+    <table class="w-full text-sm min-w-[760px]" id="tableDaftarPeserta">
       <thead>
         <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
           <th class="px-3 py-3 w-8 text-center">#</th>
           <th class="px-3 py-3">Nama Lengkap</th>
-          <th class="px-3 py-3">Divisi / Bidang</th>
+          <th class="px-3 py-3">Divisi / Instansi & Jabatan</th>
+          <th class="px-3 py-3 text-center">Kategori</th>
           <th class="px-3 py-3">No. Telp</th>
           <th class="px-3 py-3 text-center">L/P</th>
           <th class="px-3 py-3">Waktu</th>
-          <th class="px-3 py-3">TTD</th>
+          <th class="px-3 py-3 text-center">TTD</th>
           <th class="px-3 py-3 text-center">Aksi</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-slate-100">
-        @forelse($attendeesInternal as $i => $a)
-          <tr class="hover:bg-slate-50/70 transition">
-            <td class="px-3 py-3 text-xs text-slate-400 text-center tabular">
-              {{ $attendeesInternal->firstItem() + $i }}
-            </td>
-            <td class="px-3 py-3 font-bold text-slate-800">
-              {{ $a->nama }}
-            </td>
-            <td class="px-3 py-3 text-xs text-slate-700 font-medium">
-              <span class="inline-block bg-[#EAF0FA] text-[#0F2F5B] px-2.5 py-1 rounded-lg text-xs font-semibold">
-                {{ $a->divisi ?: '-' }}
-              </span>
-            </td>
-            <td class="px-3 py-3 text-xs tabular text-slate-500">{{ $a->no_telp }}</td>
-            <td class="px-3 py-3 text-xs text-slate-500 text-center">{{ $a->jenis_kelamin }}</td>
-            <td class="px-3 py-3 text-xs tabular text-slate-400">{{ $a->created_at?->format('d/m H:i') }}</td>
-            <td class="px-3 py-3">
-              <a href="{{ route('admin.attendees.signature', $a) }}" target="_blank" title="Lihat Tanda Tangan Penuh">
-                <img src="{{ route('admin.attendees.signature', $a) }}" alt="TTD" loading="lazy"
-                     class="h-8 max-w-[90px] object-contain border border-slate-200 rounded-lg bg-white px-1 hover:opacity-80 transition shadow-2xs">
-              </a>
-            </td>
-            <td class="px-3 py-3 whitespace-nowrap text-center">
-              <div class="inline-flex items-center gap-2">
-                <button type="button"
-                        data-attendee="{{ json_encode($a, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}"
-                        onclick="openEditAttendeeModal(JSON.parse(this.dataset.attendee))"
-                        class="text-xs text-[#174A9E] hover:text-[#0F2F5B] font-semibold transition bg-[#EAF0FA] hover:bg-[#d8e3f5] px-2.5 py-1 rounded-lg">
-                  Edit
-                </button>
-                <form method="POST" action="{{ route('admin.attendees.destroy', $a) }}"
-                      data-confirm="Hapus peserta '{{ addslashes($a->nama) }}' dari daftar kehadiran?"
-                      data-confirm-title="Hapus Peserta"
-                      data-confirm-btn="Ya, Hapus">
-                  @csrf @method('DELETE')
-                  <button class="text-xs text-red-500 hover:text-red-700 font-semibold transition px-1 py-1">Hapus</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-        @empty
-          <tr>
-            <td colspan="8" class="px-3 py-8 text-center text-slate-400 text-sm">
-              Belum ada peserta internal yang hadir.
-            </td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
-  <div class="mt-3">{{ $attendeesInternal->links() }}</div>
-</section>
-
-{{-- =========================================================================
-     TABEL 2 (BAWAH): DAFTAR PESERTA EKSTERNAL (TAMU / INSTANSI LUAR)
-     ========================================================================= --}}
-<section class="card mt-6 p-5 sm:p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
-  <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h3 class="font-bold text-sm sm:text-base text-[#0F2F5B]">2. Daftar Peserta Eksternal</h3>
-          <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60">
-            {{ $attendeesEksternal->total() }} Orang
-          </span>
-        </div>
-        <p class="text-xs text-slate-400 mt-0.5">Tamu undangan dari instansi vertikal, dinas, sekolah, atau lembaga luar</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-100">
-    <table class="w-full text-sm min-w-[700px]">
-      <thead>
-        <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
-          <th class="px-3 py-3 w-8 text-center">#</th>
-          <th class="px-3 py-3">Nama Lengkap</th>
-          <th class="px-3 py-3">Asal Instansi & Jabatan</th>
-          <th class="px-3 py-3">No. Telp</th>
-          <th class="px-3 py-3 text-center">L/P</th>
-          <th class="px-3 py-3">Waktu</th>
-          <th class="px-3 py-3">TTD</th>
-          <th class="px-3 py-3 text-center">Aksi</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
-        @forelse($attendeesEksternal as $i => $a)
-          <tr class="hover:bg-slate-50/70 transition">
-            <td class="px-3 py-3 text-xs text-slate-400 text-center tabular">
-              {{ $attendeesEksternal->firstItem() + $i }}
+      <tbody class="divide-y divide-slate-100" id="tbodyAttendees">
+        @forelse($attendees as $i => $a)
+          <tr class="attendee-row hover:bg-slate-50/70 transition" data-kategori="{{ $a->kategori_instansi }}">
+            <td class="px-3 py-3 text-xs text-slate-400 text-center tabular row-num">
+              {{ $attendees->firstItem() + $i }}
             </td>
             <td class="px-3 py-3 font-bold text-slate-800">
               {{ $a->nama }}
             </td>
             <td class="px-3 py-3 text-xs text-slate-600">
-              <span class="font-bold text-slate-800">{{ $a->nama_instansi ?: '-' }}</span>
-              @if($a->jabatan)
-                <div class="text-[11px] text-slate-500 font-normal mt-0.5">{{ $a->jabatan }}</div>
+              @if($a->kategori_instansi === 'internal')
+                <span class="inline-block bg-[#EAF0FA] text-[#0F2F5B] px-2.5 py-1 rounded-lg text-xs font-semibold">
+                  {{ $a->divisi ?: '-' }}
+                </span>
+              @else
+                <span class="font-bold text-slate-800">{{ $a->nama_instansi ?: '-' }}</span>
+                @if($a->jabatan)
+                  <div class="text-[11px] text-slate-500 font-normal mt-0.5">{{ $a->jabatan }}</div>
+                @endif
               @endif
+            </td>
+            <td class="px-3 py-3 text-center">
+              <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg {{ $a->kategori_instansi === 'internal' ? 'bg-[#EAF0FA] text-[#0F2F5B]' : 'bg-amber-50 text-amber-700 border border-amber-200/60' }}">
+                {{ $a->kategori_instansi === 'internal' ? 'Internal' : 'Eksternal' }}
+              </span>
             </td>
             <td class="px-3 py-3 text-xs tabular text-slate-500">{{ $a->no_telp }}</td>
             <td class="px-3 py-3 text-xs text-slate-500 text-center">{{ $a->jenis_kelamin }}</td>
             <td class="px-3 py-3 text-xs tabular text-slate-400">{{ $a->created_at?->format('d/m H:i') }}</td>
-            <td class="px-3 py-3">
-              <a href="{{ route('admin.attendees.signature', $a) }}" target="_blank" title="Lihat Tanda Tangan Penuh">
-                <img src="{{ route('admin.attendees.signature', $a) }}" alt="TTD" loading="lazy"
-                     class="h-8 max-w-[90px] object-contain border border-slate-200 rounded-lg bg-white px-1 hover:opacity-80 transition shadow-2xs">
-              </a>
+            <td class="px-3 py-3 text-center">
+              @if($a->signature_path)
+                <a href="{{ route('admin.attendees.signature', $a) }}" target="_blank" title="Lihat Tanda Tangan Penuh">
+                  <img src="{{ route('admin.attendees.signature', $a) }}" alt="TTD" loading="lazy"
+                       class="h-8 max-w-[90px] object-contain border border-slate-200 rounded-lg bg-white px-1 hover:opacity-80 transition shadow-2xs inline-block">
+                </a>
+              @else
+                <span class="text-slate-300 text-xs">-</span>
+              @endif
             </td>
             <td class="px-3 py-3 whitespace-nowrap text-center">
               <div class="inline-flex items-center gap-2">
@@ -378,16 +332,16 @@
             </td>
           </tr>
         @empty
-          <tr>
-            <td colspan="8" class="px-3 py-8 text-center text-slate-400 text-sm">
-              Belum ada peserta eksternal yang hadir.
+          <tr id="emptyRow">
+            <td colspan="9" class="px-3 py-8 text-center text-slate-400 text-sm">
+              Belum ada peserta yang mendaftar.
             </td>
           </tr>
         @endforelse
       </tbody>
     </table>
   </div>
-  <div class="mt-3">{{ $attendeesEksternal->links() }}</div>
+  <div class="mt-3">{{ $attendees->withQueryString()->links() }}</div>
 </section>
 
 {{-- MODAL UPLOAD FOTO DOKUMENTASI --}}
@@ -671,6 +625,69 @@ function previewPhoto(url, title, deleteUrl) {
     formDelete.style.display = 'none';
   }
   document.getElementById('modalPreviewPhoto').showModal();
+}
+
+function filterClientTab(e, kat) {
+  if (e) e.preventDefault();
+
+  const tabs = [
+    { key: 'all', btn: document.getElementById('btnTabAll') },
+    { key: 'internal', btn: document.getElementById('btnTabInternal') },
+    { key: 'eksternal', btn: document.getElementById('btnTabEksternal') }
+  ];
+
+  tabs.forEach(t => {
+    if (!t.btn) return;
+    if (t.key === kat) {
+      t.btn.classList.add('bg-white', 'text-[#0F2F5B]', 'shadow-xs');
+      t.btn.classList.remove('text-slate-600');
+    } else {
+      t.btn.classList.remove('bg-white', 'text-[#0F2F5B]', 'shadow-xs');
+      t.btn.classList.add('text-slate-600');
+    }
+  });
+
+  const summary = document.getElementById('tabSummaryText');
+  if (summary) {
+    if (kat === 'internal') {
+      summary.innerHTML = 'Menampilkan peserta <strong>Internal BNN</strong> ({{ $internal }} orang)';
+    } else if (kat === 'eksternal') {
+      summary.innerHTML = 'Menampilkan peserta <strong>Eksternal</strong> ({{ $eksternal }} orang)';
+    } else {
+      summary.innerHTML = 'Menampilkan <strong>seluruh peserta</strong> ({{ $internal }} Internal, {{ $eksternal }} Eksternal)';
+    }
+  }
+
+  const rows = document.querySelectorAll('.attendee-row');
+  let visibleCount = 0;
+  rows.forEach((row) => {
+    const rowKat = row.getAttribute('data-kategori');
+    if (kat === 'all' || rowKat === kat) {
+      row.style.display = '';
+      visibleCount++;
+      const numCell = row.querySelector('.row-num');
+      if (numCell) numCell.textContent = visibleCount;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  let emptyRow = document.getElementById('clientEmptyRow');
+  if (visibleCount === 0) {
+    if (!emptyRow) {
+      const tbody = document.getElementById('tbodyAttendees');
+      if (tbody) {
+        emptyRow = document.createElement('tr');
+        emptyRow.id = 'clientEmptyRow';
+        emptyRow.innerHTML = '<td colspan="9" class="px-3 py-8 text-center text-slate-400 text-sm">Tidak ada peserta yang terdaftar pada kategori ini.</td>';
+        tbody.appendChild(emptyRow);
+      }
+    } else {
+      emptyRow.style.display = '';
+    }
+  } else if (emptyRow) {
+    emptyRow.style.display = 'none';
+  }
 }
 
 function toggleEditFields(val) {

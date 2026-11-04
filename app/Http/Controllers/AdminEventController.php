@@ -118,10 +118,11 @@ class AdminEventController extends Controller
         $internalPct = $total > 0 ? (int) round($internal / $total * 100) : 0;
 
         $q = trim((string) $request->query('q', ''));
+        $kategori = $request->query('kategori', 'all');
         $escapedQ = addcslashes($q, '%_\\');
 
-        $baseAttendeeQuery = fn ($kategori) => $event->attendees()
-            ->where('kategori_instansi', $kategori)
+        $attendees = $event->attendees()
+            ->when(in_array($kategori, ['internal', 'eksternal']), fn ($query) => $query->where('kategori_instansi', $kategori))
             ->when($q, fn ($query) => $query->where(function ($w) use ($escapedQ) {
                 $w->where('nama', 'like', "%{$escapedQ}%")
                     ->orWhere('divisi', 'like', "%{$escapedQ}%")
@@ -129,10 +130,10 @@ class AdminEventController extends Controller
                     ->orWhere('jabatan', 'like', "%{$escapedQ}%")
                     ->orWhere('no_telp', 'like', "%{$escapedQ}%");
             }))
-            ->orderByDesc('id');
-
-        $attendeesInternal = $baseAttendeeQuery('internal')->paginate(15, ['*'], 'page_internal')->withQueryString();
-        $attendeesEksternal = $baseAttendeeQuery('eksternal')->paginate(15, ['*'], 'page_eksternal')->withQueryString();
+            ->orderByRaw("CASE WHEN kategori_instansi = 'internal' THEN 1 ELSE 2 END")
+            ->orderByDesc('id')
+            ->paginate(35)
+            ->withQueryString();
 
         $categories = Category::getList();
 
@@ -140,7 +141,7 @@ class AdminEventController extends Controller
 
         return view('admin.events.show', compact(
             'event', 'total', 'internal', 'eksternal', 'lCount', 'pCount',
-            'internalPct', 'attendeesInternal', 'attendeesEksternal', 'q', 'categories', 'photos'
+            'internalPct', 'attendees', 'q', 'kategori', 'categories', 'photos'
         ));
     }
 
