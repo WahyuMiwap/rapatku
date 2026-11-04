@@ -24,10 +24,10 @@
       <form id="absenForm" method="POST" action="{{ route('absen.store', $event->slug) }}" class="mt-1 space-y-4">
         @csrf
         <div>
-          <span class="text-sm font-bold text-[#0F2F5B]">Kategori</span>
+          <span class="text-sm font-bold text-[#0F2F5B]">Kategori Peserta</span>
           <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="internal" {{ old('kategori_instansi', 'internal')==='internal'?'checked':'' }} required class="accent-[#174A9E]"> <span class="font-semibold">Internal</span></label>
-            <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="eksternal" {{ old('kategori_instansi')==='eksternal'?'checked':'' }} class="accent-[#174A9E]"> <span class="font-semibold">Eksternal</span></label>
+            <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="internal" {{ old('kategori_instansi', $event->tipe_rapat ?? 'internal') === 'internal' ? 'checked' : '' }} required class="accent-[#174A9E]"> <span class="font-semibold">Internal BNN</span></label>
+            <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="eksternal" {{ old('kategori_instansi', $event->tipe_rapat ?? 'internal') === 'eksternal' ? 'checked' : '' }} class="accent-[#174A9E]"> <span class="font-semibold">Eksternal (Tamu)</span></label>
           </div>
         </div>
         <div>

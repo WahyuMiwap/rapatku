@@ -24,11 +24,16 @@ class AdminEventController extends Controller
         $activeEvents = Event::where('is_active', true)->count();
         $closedEvents = Event::where('is_active', false)->count();
 
+        $totalInternal = Event::where(fn ($w) => $w->where('tipe_rapat', 'internal')->orWhereNull('tipe_rapat'))->count();
+        $totalEksternal = Event::where('tipe_rapat', 'eksternal')->count();
+
         $q = trim((string) $request->query('q', ''));
         $status = $request->query('status', 'all');
         $escapedQ = addcslashes($q, '%_\\');
 
-        $events = Event::withCount('attendees')
+        $baseEventQuery = fn ($tipe) => Event::withCount('attendees')
+            ->when($tipe === 'internal', fn ($query) => $query->where(fn ($w) => $w->where('tipe_rapat', 'internal')->orWhereNull('tipe_rapat')))
+            ->when($tipe === 'eksternal', fn ($query) => $query->where('tipe_rapat', 'eksternal'))
             ->when($q, fn ($query) => $query->where(function ($w) use ($escapedQ) {
                 $w->where('title', 'like', "%{$escapedQ}%")
                     ->orWhere('slug', 'like', "%{$escapedQ}%")
@@ -38,15 +43,17 @@ class AdminEventController extends Controller
             ->when($status === 'closed', fn ($query) => $query->where('is_active', false))
             ->when($status === 'upcoming', fn ($query) => $query->whereDate('event_date', '>=', today()))
             ->when($status === 'done', fn ($query) => $query->whereDate('event_date', '<', today()))
-            ->orderByDesc('id')
-            ->paginate(6)
-            ->withQueryString();
+            ->orderByDesc('id');
+
+        $eventsInternal = $baseEventQuery('internal')->paginate(5, ['*'], 'page_internal')->withQueryString();
+        $eventsEksternal = $baseEventQuery('eksternal')->paginate(5, ['*'], 'page_eksternal')->withQueryString();
 
         $categories = Category::getList();
 
         return view('admin.dashboard', compact(
-            'totalEvents', 'totalAttendees', 'activeEvents',
-            'closedEvents', 'events', 'q', 'status', 'categories'
+            'totalEvents', 'totalAttendees', 'activeEvents', 'closedEvents',
+            'totalInternal', 'totalEksternal', 'eventsInternal', 'eventsEksternal',
+            'q', 'status', 'categories'
         ));
     }
 
@@ -113,16 +120,19 @@ class AdminEventController extends Controller
         $q = trim((string) $request->query('q', ''));
         $escapedQ = addcslashes($q, '%_\\');
 
-        $attendees = $event->attendees()
+        $baseAttendeeQuery = fn ($kategori) => $event->attendees()
+            ->where('kategori_instansi', $kategori)
             ->when($q, fn ($query) => $query->where(function ($w) use ($escapedQ) {
                 $w->where('nama', 'like', "%{$escapedQ}%")
+                    ->orWhere('divisi', 'like', "%{$escapedQ}%")
                     ->orWhere('nama_instansi', 'like', "%{$escapedQ}%")
                     ->orWhere('jabatan', 'like', "%{$escapedQ}%")
                     ->orWhere('no_telp', 'like', "%{$escapedQ}%");
             }))
-            ->orderByDesc('id')
-            ->paginate(25)
-            ->withQueryString();
+            ->orderByDesc('id');
+
+        $attendeesInternal = $baseAttendeeQuery('internal')->paginate(15, ['*'], 'page_internal')->withQueryString();
+        $attendeesEksternal = $baseAttendeeQuery('eksternal')->paginate(15, ['*'], 'page_eksternal')->withQueryString();
 
         $categories = Category::getList();
 
@@ -130,7 +140,7 @@ class AdminEventController extends Controller
 
         return view('admin.events.show', compact(
             'event', 'total', 'internal', 'eksternal', 'lCount', 'pCount',
-            'internalPct', 'attendees', 'q', 'categories', 'photos'
+            'internalPct', 'attendeesInternal', 'attendeesEksternal', 'q', 'categories', 'photos'
         ));
     }
 
@@ -141,6 +151,7 @@ class AdminEventController extends Controller
             'title' => ['required', 'string', 'max:150'],
             'event_date' => ['required', 'date'],
             'category' => ['nullable', 'string', 'max:100'],
+            'tipe_rapat' => ['nullable', 'string', 'in:internal,eksternal'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:3072'],
         ], [
             'logo.max' => 'Ukuran logo rapat maksimal 3 MB.',
@@ -162,6 +173,7 @@ class AdminEventController extends Controller
             'title' => $validated['title'],
             'event_date' => $validated['event_date'],
             'category' => $validated['category'] ?? null,
+            'tipe_rapat' => $validated['tipe_rapat'] ?? 'internal',
             'logo_path' => $logoPath,
             'is_active' => true,
         ]);
@@ -269,9 +281,11 @@ class AdminEventController extends Controller
     {
         $event->load('photos');
         $attendees = $event->attendees()->orderBy('id')->get();
+        $attendeesInternal = $attendees->where('kategori_instansi', 'internal')->values();
+        $attendeesEksternal = $attendees->where('kategori_instansi', 'eksternal')->values();
         $signatories = Signatory::active()->orderBy('nama_lengkap')->get();
 
-        return view('admin.events.rekap', compact('event', 'attendees', 'signatories'));
+        return view('admin.events.rekap', compact('event', 'attendees', 'attendeesInternal', 'attendeesEksternal', 'signatories'));
     }
 
     /** Simpan snapshot teks penandatangan (mengetahui & pembuat) langsung ke data laporan event */

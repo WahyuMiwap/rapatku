@@ -9,11 +9,21 @@ use Illuminate\Support\Str;
 class Event extends Model
 {
     protected $fillable = [
-        'uuid', 'slug', 'title', 'event_date', 'category', 'logo_path', 'is_active',
+        'uuid', 'slug', 'title', 'event_date', 'category', 'tipe_rapat', 'logo_path', 'is_active',
         'nama_penandatangan', 'jabatan_penandatangan', 'nip_penandatangan',
         'nama_mengetahui', 'jabatan_mengetahui', 'nip_mengetahui',
         'nama_pembuat', 'jabatan_pembuat', 'nip_pembuat',
     ];
+
+    public function isInternal(): bool
+    {
+        return ($this->tipe_rapat ?? 'internal') === 'internal';
+    }
+
+    public function isEksternal(): bool
+    {
+        return ($this->tipe_rapat ?? '') === 'eksternal';
+    }
 
     protected static function booted(): void
     {
