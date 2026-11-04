@@ -229,21 +229,21 @@
          id="btnTabAll"
          class="tab-attendee-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $kategori === 'all' ? 'bg-white text-[#0F2F5B] shadow-xs' : 'text-slate-600 hover:text-[#0F2F5B]' }}">
         <span>Semua</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] {{ $kategori === 'all' ? 'bg-[#EAF0FA] text-[#174A9E]' : 'bg-slate-200/80 text-slate-700' }} font-extrabold">{{ $total }}</span>
+        <span class="text-xs font-semibold tabular opacity-80">{{ $total }}</span>
       </a>
       <a href="{{ route('admin.events.show', ['event' => $event, 'q' => $q, 'kategori' => 'internal']) }}"
          onclick="filterClientTab(event, 'internal')"
          id="btnTabInternal"
          class="tab-attendee-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $kategori === 'internal' ? 'bg-white text-[#0F2F5B] shadow-xs' : 'text-slate-600 hover:text-[#0F2F5B]' }}">
         <span>Internal</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] bg-blue-100 text-[#174A9E] font-extrabold">{{ $internal }}</span>
+        <span class="text-xs font-semibold tabular opacity-80">{{ $internal }}</span>
       </a>
       <a href="{{ route('admin.events.show', ['event' => $event, 'q' => $q, 'kategori' => 'eksternal']) }}"
          onclick="filterClientTab(event, 'eksternal')"
          id="btnTabEksternal"
          class="tab-attendee-btn px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {{ $kategori === 'eksternal' ? 'bg-white text-[#0F2F5B] shadow-xs' : 'text-slate-600 hover:text-[#0F2F5B]' }}">
         <span>Eksternal</span>
-        <span class="px-2 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-extrabold">{{ $eksternal }}</span>
+        <span class="text-xs font-semibold tabular opacity-80">{{ $eksternal }}</span>
       </a>
     </div>
 
