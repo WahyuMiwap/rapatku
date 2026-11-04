@@ -285,9 +285,8 @@
             </td>
             <td class="px-3 py-3 text-xs text-slate-600">
               @if($a->kategori_instansi === 'internal')
-                <span class="inline-block bg-[#EAF0FA] text-[#0F2F5B] px-2.5 py-1 rounded-lg text-xs font-semibold">
-                  {{ $a->divisi ?: '-' }}
-                </span>
+                <span class="font-bold text-slate-800">BNN Kota Surabaya</span>
+                <div class="text-[11px] text-slate-500 font-normal mt-0.5">{{ $a->divisi ?: '-' }}</div>
               @else
                 <span class="font-bold text-slate-800">{{ $a->nama_instansi ?: '-' }}</span>
                 @if($a->jabatan)
@@ -295,10 +294,8 @@
                 @endif
               @endif
             </td>
-            <td class="px-3 py-3 text-center">
-              <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg {{ $a->kategori_instansi === 'internal' ? 'bg-[#EAF0FA] text-[#0F2F5B]' : 'bg-amber-50 text-amber-700 border border-amber-200/60' }}">
-                {{ $a->kategori_instansi === 'internal' ? 'Internal' : 'Eksternal' }}
-              </span>
+            <td class="px-3 py-3 text-center text-xs font-semibold text-slate-700">
+              {{ $a->kategori_instansi === 'internal' ? 'Internal' : 'Eksternal' }}
             </td>
             <td class="px-3 py-3 text-xs tabular text-slate-500">{{ $a->no_telp }}</td>
             <td class="px-3 py-3 text-xs text-slate-500 text-center">{{ $a->jenis_kelamin }}</td>

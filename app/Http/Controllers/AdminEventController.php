@@ -420,7 +420,9 @@ class AdminEventController extends Controller
             $sheet->setCellValue('B' . $r, $this->sanitizeSpreadsheet($a->nama));
             $sheet->setCellValue('C' . $r, $a->jenis_kelamin);
             $sheet->setCellValue('D' . $r, ucfirst($a->kategori_instansi));
-            $instansiText = $a->divisi ?: ($a->nama_instansi . ($a->jabatan ? ' (' . $a->jabatan . ')' : ''));
+            $instansiText = $a->kategori_instansi === 'internal'
+                ? ('BNN Kota Surabaya' . ($a->divisi ? ' (' . $a->divisi . ')' : ''))
+                : ($a->nama_instansi . ($a->jabatan ? ' (' . $a->jabatan . ')' : ''));
             $sheet->setCellValue('E' . $r, $this->sanitizeSpreadsheet($instansiText));
             $sheet->setCellValue('F' . $r, $this->sanitizeSpreadsheet($a->no_telp));
             $sheet->setCellValue('G' . $r, $a->created_at?->format('d/m/Y H:i'));
