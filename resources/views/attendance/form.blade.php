@@ -49,7 +49,16 @@
         </div>
         <div id="wrapJabatan">
           <label class="text-sm font-bold text-[#0F2F5B]">Jabatan <span class="text-red-500">*</span></label>
-          <input name="jabatan" id="inputJabatan" value="{{ old('jabatan') }}" maxlength="150" class="input-bnn mt-1" placeholder="cth. Staf / Kasubbag / Kepala / Guru / Anggota">
+          <input name="jabatan" id="inputJabatan" value="{{ old('jabatan') }}" required maxlength="150" list="listJabatanInternal" class="input-bnn mt-1" placeholder="cth. Kepala BNN / Kasubbag Umum / Katim / Staf">
+          <datalist id="listJabatanInternal">
+            <option value="Kepala BNN Kota Surabaya">
+            <option value="Kasubbag Umum">
+            <option value="Katim Rehabilitasi">
+            <option value="Katim Pemberantasan">
+            <option value="Katim Pencegahan">
+            <option value="Katim Pemberdayaan">
+            <option value="Staf">
+          </datalist>
         </div>
         <div>
           <label class="text-sm font-bold text-[#0F2F5B]">No. HP / WA <span class="text-red-500">*</span></label>
@@ -117,10 +126,16 @@ function toggleFields() {
 
   if (wrapDivisi) wrapDivisi.style.display = isInternal ? '' : 'none';
   if (wrapInstansi) wrapInstansi.style.display = isInternal ? 'none' : '';
-  if (wrapJabatan) wrapJabatan.style.display = isInternal ? 'none' : '';
+  if (wrapJabatan) wrapJabatan.style.display = '';
   if (selectDivisi) selectDivisi.required = isInternal;
   if (inputInstansi) inputInstansi.required = !isInternal;
-  if (inputJabatan) inputJabatan.required = !isInternal;
+  if (inputJabatan) {
+    inputJabatan.required = true;
+    inputJabatan.placeholder = isInternal
+      ? 'cth. Kepala BNN / Kasubbag Umum / Katim / Staf'
+      : 'cth. Kepala Dinas / Camat / Guru / Anggota';
+    inputJabatan.setAttribute('list', isInternal ? 'listJabatanInternal' : '');
+  }
 }
 radios.forEach(r => r.addEventListener('change', toggleFields));
 toggleFields();

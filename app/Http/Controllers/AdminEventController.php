@@ -286,12 +286,13 @@ class AdminEventController extends Controller
 
         return response()->streamDownload(function () use ($event) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['No', 'Nama', 'Divisi', 'Kategori', 'Asal Instansi / Tempat', 'No Telp', 'L/P', 'Waktu']);
+            fputcsv($out, ['No', 'Nama', 'Jabatan', 'Divisi', 'Kategori', 'Asal Instansi / Tempat', 'No Telp', 'L/P', 'Waktu']);
             $i = 1;
             foreach ($event->attendees()->orderBy('id')->cursor() as $a) {
                 fputcsv($out, [
                     $i++,
                     $this->sanitizeSpreadsheet($a->nama),
+                    $this->sanitizeSpreadsheet($a->jabatan),
                     $this->sanitizeSpreadsheet($a->divisi),
                     $a->kategori_instansi,
                     $this->sanitizeSpreadsheet($a->nama_instansi),
@@ -475,7 +476,7 @@ class AdminEventController extends Controller
             $sheet->setCellValue('C' . $r, $a->jenis_kelamin);
             $sheet->setCellValue('D' . $r, ucfirst($a->kategori_instansi));
             $instansiText = $a->kategori_instansi === 'internal'
-                ? ('BNN Kota Surabaya' . ($a->divisi ? ' (' . $a->divisi . ')' : ''))
+                ? ('BNN Kota Surabaya' . ($a->jabatan ? ' - ' . $a->jabatan : '') . ($a->divisi ? ' (' . $a->divisi . ')' : ''))
                 : ($a->nama_instansi . ($a->jabatan ? ' (' . $a->jabatan . ')' : ''));
             $sheet->setCellValue('E' . $r, $this->sanitizeSpreadsheet($instansiText));
             $sheet->setCellValue('F' . $r, $this->sanitizeSpreadsheet($a->no_telp));

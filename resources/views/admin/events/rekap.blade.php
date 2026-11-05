@@ -232,7 +232,7 @@
             <tr class="bg-[#EDF2F9] text-slate-800">
               <th class="border border-slate-400 px-2 py-2 text-center w-10">No</th>
               <th class="border border-slate-400 px-3 py-2 text-left">Nama Lengkap</th>
-              <th class="border border-slate-400 px-3 py-2 text-left">Divisi / Bidang</th>
+              <th class="border border-slate-400 px-3 py-2 text-left">Jabatan & Divisi</th>
               <th class="border border-slate-400 px-3 py-2 text-center">No. Telp</th>
               <th class="border border-slate-400 px-2 py-2 text-center w-12">L/P</th>
               <th class="border border-slate-400 px-3 py-2 text-center w-36">Tanda Tangan</th>
@@ -244,12 +244,14 @@
               <td class="border border-slate-400 px-2 py-2 text-center">{{ $i + 1 }}</td>
               <td class="border border-slate-400 px-3 py-2 font-medium">{{ $a->nama }}</td>
               <td class="border border-slate-400 px-3 py-2">
-                @if($a->divisi)
-                  <span>{{ $a->divisi }}</span>
-                @endif
                 @if($a->jabatan)
-                  <div class="text-[11px] text-slate-600 font-normal {{ $a->divisi ? '' : 'font-medium text-slate-800' }}">({{ $a->jabatan }})</div>
-                @elseif(!$a->divisi)
+                  <span class="font-medium text-slate-900">{{ $a->jabatan }}</span>
+                  @if($a->divisi)
+                    <div class="text-[11px] text-slate-600 font-normal">({{ $a->divisi }})</div>
+                  @endif
+                @elseif($a->divisi)
+                  <span>{{ $a->divisi }}</span>
+                @else
                   <span>-</span>
                 @endif
               </td>

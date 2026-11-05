@@ -72,7 +72,7 @@ class AttendanceController extends Controller
             'nama' => ['required', 'string', 'min:3', 'max:100'],
             'divisi' => ['required_if:kategori_instansi,internal', 'nullable', 'string', 'max:100'],
             'nama_instansi' => ['required_if:kategori_instansi,eksternal', 'nullable', 'string', 'max:150'],
-            'jabatan' => ['required_if:kategori_instansi,eksternal', 'nullable', 'string', 'max:150'],
+            'jabatan' => ['required', 'string', 'max:150'],
             'no_telp' => [
                 'required', 'digits_between:10,15',
                 Rule::unique('attendees')->where('event_id', $event->id),
@@ -82,7 +82,7 @@ class AttendanceController extends Controller
         ], [
             'no_telp.unique' => 'Nomor ini sudah tercatat hadir.',
             'nama_instansi.required_if' => 'Asal instansi / lembaga / tempat wajib diisi untuk peserta eksternal.',
-            'jabatan.required_if' => 'Jabatan wajib diisi untuk peserta eksternal.',
+            'jabatan.required' => 'Jabatan wajib diisi.',
             'divisi.required_if' => 'Divisi / bidang wajib dipilih untuk peserta internal.',
             'signature.required' => 'Tanda tangan wajib digambar di kotak yang tersedia.',
         ]);

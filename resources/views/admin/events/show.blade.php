@@ -268,7 +268,10 @@
             <td class="px-3 py-3 text-xs text-slate-600">
               @if($a->kategori_instansi === 'internal')
                 <span class="font-bold text-slate-800">BNN Kota Surabaya</span>
-                <div class="text-[11px] text-slate-500 font-normal mt-0.5">{{ $a->divisi ?: '-' }}</div>
+                @if($a->jabatan)
+                  <div class="text-[11px] text-[#174A9E] font-semibold mt-0.5">{{ $a->jabatan }}</div>
+                @endif
+                <div class="text-[10px] text-slate-400 font-normal">{{ $a->divisi ?: '-' }}</div>
               @else
                 <span class="font-bold text-slate-800">{{ $a->nama_instansi ?: '-' }}</span>
                 @if($a->jabatan)
@@ -436,8 +439,17 @@
       <input type="text" name="nama_instansi" id="editNamaInstansi" maxlength="150" class="input-bnn mt-1 text-xs" placeholder="cth. Dinas Kesehatan / SMAN 5 / Kel. Barata Jaya">
     </div>
     <div id="wrapEditJabatan">
-      <label class="text-xs font-bold text-[#0F2F5B]">Jabatan</label>
-      <input type="text" name="jabatan" id="editJabatan" maxlength="150" class="input-bnn mt-1 text-xs" placeholder="cth. Staf / Kasubbag / Guru / Anggota">
+      <label class="text-xs font-bold text-[#0F2F5B]">Jabatan <span class="text-red-500">*</span></label>
+      <input type="text" name="jabatan" id="editJabatan" required maxlength="150" list="listEditJabatan" class="input-bnn mt-1 text-xs" placeholder="cth. Kepala BNN / Kasubbag Umum / Katim / Staf">
+      <datalist id="listEditJabatan">
+        <option value="Kepala BNN Kota Surabaya">
+        <option value="Kasubbag Umum">
+        <option value="Katim Rehabilitasi">
+        <option value="Katim Pemberantasan">
+        <option value="Katim Pencegahan">
+        <option value="Katim Pemberdayaan">
+        <option value="Staf">
+      </datalist>
     </div>
     <div class="grid grid-cols-2 gap-3">
       <div>

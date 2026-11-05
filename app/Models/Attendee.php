@@ -66,12 +66,29 @@ class Attendee extends Model
         $jabatan = strtolower(trim($attendee->jabatan ?? ''));
         $divisi = strtolower(trim($attendee->divisi ?? ''));
 
-        // Ambil penandatangan aktif jika tidak disediakan
+        // 1. Prioritas Utama: Cek Jabatan Peserta
+        $isSubInJabatan = preg_match('/\b(subbag|subbagian|seksi|tim|kasubbag|kasi|katim|urusan)\b/i', $jabatan);
+        $isKepalaJabatan = (
+            preg_match('/\b(kepala bnn|ketua bnn|ka\.?\s*bnn|ka\.?\s*bnnk|kepala badan|kepala kantor|pimpinan bnn|kepala kota surabaya)\b/i', $jabatan) ||
+            preg_match('/^(kepala|ketua|pimpinan|ka bnn)$/i', $jabatan)
+        ) && !$isSubInJabatan;
+
+        if ($isKepalaJabatan) {
+            return 1; // Kepala BNN
+        }
+
+        $isKasubbagJabatan = preg_match('/\b(kasubbag\s+umum|kasubag\s+umum|kepala\s+sub\s*bagian\s+umum|kepala\s+subbagian\s+umum|kasubbag\s+um|kasubag\s+um)\b/i', $jabatan) ||
+                             (preg_match('/^(kasubbag|kasubag)$/i', $jabatan) && preg_match('/^(umum|subbag umum)$/i', $divisi));
+
+        if ($isKasubbagJabatan) {
+            return 2; // Kasubbag Umum
+        }
+
+        // 2. Fallback: Cek pencocokan nama terhadap Penandatangan (Signatory) aktif
         if ($signatories === null) {
             $signatories = Signatory::active()->get();
         }
 
-        // 1. Cek pencocokan nama terhadap Penandatangan (Signatory) aktif yang merupakan Kepala atau Kasubbag Umum
         if (!empty($signatories)) {
             foreach ($signatories as $sig) {
                 $sigJabatan = strtolower(trim($sig->jabatan ?? ''));
@@ -106,14 +123,11 @@ class Attendee extends Model
             }
         }
 
-        $allText = "{$jabatan} {$divisi} {$nama}";
+        // 3. Fallback teks divisi atau nama jika mengandung kata kunci pimpinan
+        $allText = "{$divisi} {$nama}";
 
-        // 2. Cek apakah Kepala / Ketua / Pimpinan BNN
-        $isSub = preg_match('/\b(subbag|subbagian|seksi|tim|kasubbag|kasi|katim|urusan)\b/i', $jabatan) ||
-                 preg_match('/\b(subbag|subbagian|seksi|tim|kasubbag|kasi|katim|urusan)\b/i', $divisi);
-
+        $isSub = preg_match('/\b(subbag|subbagian|seksi|tim|kasubbag|kasi|katim|urusan)\b/i', $divisi);
         $isKepala = preg_match('/\b(kepala bnn|ketua bnn|ka\.?\s*bnn|ka\.?\s*bnnk|kepala badan|kepala kantor|pimpinan bnn|kepala kota surabaya)\b/i', $allText) ||
-                    preg_match('/^(kepala|ketua|pimpinan|ka bnn)$/i', $jabatan) ||
                     preg_match('/^(kepala|ketua|pimpinan|ka bnn)$/i', $divisi) ||
                     preg_match('/\b(kepala bnn|ketua bnn|ka\.?\s*bnn)\b/i', $nama);
 
@@ -121,9 +135,7 @@ class Attendee extends Model
             return 1; // Kepala BNN
         }
 
-        // 3. Cek apakah Kasubbag Umum (Kepala Subbagian Umum)
-        $isKasubbagUmum = preg_match('/\b(kasubbag\s+umum|kasubag\s+umum|kepala\s+sub\s*bagian\s+umum|kepala\s+subbagian\s+umum|kasubbag\s+um|kasubag\s+um)\b/i', $allText) ||
-                          (preg_match('/^(kasubbag|kasubag)$/i', $jabatan) && preg_match('/^(umum|subbag umum)$/i', $divisi));
+        $isKasubbagUmum = preg_match('/\b(kasubbag\s+umum|kasubag\s+umum|kepala\s+sub\s*bagian\s+umum|kepala\s+subbagian\s+umum|kasubbag\s+um|kasubag\s+um)\b/i', $allText);
 
         if ($isKasubbagUmum) {
             return 2; // Kasubbag Umum
