@@ -29,9 +29,10 @@ class AdminEventController extends Controller
 
         $q = trim((string) $request->query('q', ''));
         $status = $request->query('status', 'all');
+        $tipe = $request->query('tipe', 'all');
         $escapedQ = addcslashes($q, '%_\\');
 
-        $baseEventQuery = fn ($tipe) => Event::withCount('attendees')
+        $events = Event::withCount('attendees')
             ->when($tipe === 'internal', fn ($query) => $query->where(fn ($w) => $w->where('tipe_rapat', 'internal')->orWhereNull('tipe_rapat')))
             ->when($tipe === 'eksternal', fn ($query) => $query->where('tipe_rapat', 'eksternal'))
             ->when($q, fn ($query) => $query->where(function ($w) use ($escapedQ) {
@@ -43,17 +44,16 @@ class AdminEventController extends Controller
             ->when($status === 'closed', fn ($query) => $query->where('is_active', false))
             ->when($status === 'upcoming', fn ($query) => $query->whereDate('event_date', '>=', today()))
             ->when($status === 'done', fn ($query) => $query->whereDate('event_date', '<', today()))
-            ->orderByDesc('id');
-
-        $eventsInternal = $baseEventQuery('internal')->paginate(5, ['*'], 'page_internal')->withQueryString();
-        $eventsEksternal = $baseEventQuery('eksternal')->paginate(5, ['*'], 'page_eksternal')->withQueryString();
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
 
         $categories = Category::getList();
 
         return view('admin.dashboard', compact(
             'totalEvents', 'totalAttendees', 'activeEvents', 'closedEvents',
-            'totalInternal', 'totalEksternal', 'eventsInternal', 'eventsEksternal',
-            'q', 'status', 'categories'
+            'totalInternal', 'totalEksternal', 'events',
+            'q', 'status', 'tipe', 'categories'
         ));
     }
 
@@ -77,7 +77,7 @@ class AdminEventController extends Controller
         $escapedQ = addcslashes($q, '%_\\');
 
         // Cari langsung pada kolom title (judul rapat)
-        $events = Event::select('id', 'uuid', 'title', 'category', 'event_date', 'is_active')
+        $events = Event::select('id', 'uuid', 'title', 'category', 'event_date', 'is_active', 'tipe_rapat')
             ->where('title', 'like', "%{$escapedQ}%")
             ->orderByDesc('id')
             ->limit(5)
@@ -87,6 +87,7 @@ class AdminEventController extends Controller
                     'id' => $event->id,
                     'title' => $event->title,
                     'category' => $event->category,
+                    'tipe_rapat' => $event->tipe_rapat ?? 'internal',
                     'date' => $event->event_date ? $event->event_date->format('d M Y') : '',
                     'is_active' => (bool) $event->is_active,
                     'url' => route('admin.events.show', $event),

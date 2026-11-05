@@ -153,12 +153,14 @@
     </form>
   </dialog>
 
-  {{-- Kontrol Filter Global (Pencarian & Status) --}}
+  {{-- =========================================================================
+       DAFTAR SELURUH RAPAT (INTERNAL & EKSTERNAL DALAM 1 TABEL)
+       ========================================================================= --}}
   <section class="card mt-4 p-5">
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
       <div>
-        <h2 class="font-bold text-[#0F2F5B]">Kelola Daftar Rapat</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Daftar rapat terbagi menjadi 2 kategori: Rapat Internal dan Rapat Eksternal</p>
+        <h2 class="font-bold text-[#0F2F5B]">Daftar Rapat</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Seluruh agenda rapat internal dan eksternal BNN Kota Surabaya</p>
       </div>
       <form id="filterRapatForm" method="GET" action="{{ route('admin.dashboard') }}" class="flex flex-wrap items-center gap-2">
         <div class="relative" id="searchContainer">
@@ -181,6 +183,14 @@
                class="hidden absolute left-0 top-full mt-1.5 w-72 sm:w-84 max-w-[90vw] bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden z-50 text-left transition">
           </div>
         </div>
+        <select id="selectTipeRapat"
+                name="tipe"
+                class="input-bnn !py-2 text-xs w-auto cursor-pointer"
+                onchange="this.form.submit()">
+          <option value="all" {{ ($tipe ?? 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
+          <option value="internal" {{ ($tipe ?? '') === 'internal' ? 'selected' : '' }}>Internal</option>
+          <option value="eksternal" {{ ($tipe ?? '') === 'eksternal' ? 'selected' : '' }}>Eksternal</option>
+        </select>
         <select id="selectStatusRapat"
                 name="status"
                 class="input-bnn !py-2 text-xs w-auto cursor-pointer"
@@ -189,56 +199,39 @@
           <option value="active" {{ $status === 'active' ? 'selected' : '' }}>Aktif</option>
           <option value="closed" {{ $status === 'closed' ? 'selected' : '' }}>Selesai</option>
         </select>
-        @if($q || $status !== 'all')
+        @if($q || $status !== 'all' || ($tipe ?? 'all') !== 'all')
           <a href="{{ route('admin.dashboard') }}" class="btn-soft !py-2 text-xs">Reset</a>
         @endif
       </form>
     </div>
-  </section>
-
-  {{-- =========================================================================
-       TABEL 1 (ATAS): DAFTAR RAPAT INTERNAL
-       ========================================================================= --}}
-  <section class="card mt-4 p-5">
-    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-[#EAF0FA] text-[#174A9E] flex items-center justify-center font-bold">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-sm sm:text-base text-[#0F2F5B]">1. Daftar Rapat Internal</h3>
-            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-[#EAF0FA] text-[#174A9E]">
-              {{ $eventsInternal->total() }} Rapat
-            </span>
-          </div>
-          <p class="text-xs text-slate-400 mt-0.5">Rapat kedinasan internal antar bidang BNN Kota Surabaya</p>
-        </div>
-      </div>
-    </div>
 
     <div class="mt-4 overflow-x-auto rounded-xl border border-slate-100">
       <table class="w-full text-sm min-w-[720px] table-fixed">
         <thead>
           <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
-            <th class="p-3 pl-5 w-[38%]">Rapat</th>
-            <th class="p-3 w-[24%]">Tanggal</th>
-            <th class="p-3 w-[16%] text-center">Status</th>
+            <th class="p-3 pl-5 w-[42%]">Rapat</th>
+            <th class="p-3 w-[20%]">Tanggal</th>
+            <th class="p-3 w-[14%] text-center">Status</th>
             <th class="p-3 w-[12%] text-center">Hadir</th>
-            <th class="p-3 w-[10%] text-right pr-6">Aksi</th>
+            <th class="p-3 w-[12%] text-right pr-6">Aksi</th>
           </tr>
         </thead>
         <tbody>
-          @forelse($eventsInternal as $e)
+          @forelse($events as $e)
             <tr onclick="window.location='{{ route('admin.events.show', $e) }}'"
                 class="border-t border-slate-100 hover:bg-slate-50/70 transition cursor-pointer group">
               <td class="p-3 pl-5">
-                <span title="{{ $e->title }}"
-                   class="font-bold text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate max-w-[220px] sm:max-w-[280px] block">
-                  {{ $e->title }}
-                </span>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span title="{{ $e->title }}"
+                     class="font-bold text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate max-w-[200px] sm:max-w-[280px]">
+                    {{ $e->title }}
+                  </span>
+                  @if($e->tipe_rapat === 'eksternal')
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200/60 shrink-0">Eksternal</span>
+                  @else
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#EAF0FA] text-[#174A9E] border border-blue-100 shrink-0">Internal</span>
+                  @endif
+                </div>
                 @if($e->category)
                   <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px] sm:max-w-[280px]">{{ $e->category }}</div>
                 @endif
@@ -253,8 +246,8 @@
               <td class="p-3 text-center font-extrabold text-[#0F2F5B] tabular">{{ $e->attendees_count }}</td>
               <td class="p-3 whitespace-nowrap text-right pr-6" onclick="event.stopPropagation()">
                 <form method="POST" action="{{ route('admin.events.destroy', $e) }}" class="inline"
-                      data-confirm="Hapus rapat internal '{{ addslashes($e->title) }}' beserta seluruh data kehadiran?"
-                      data-confirm-title="Hapus Rapat Internal"
+                      data-confirm="Hapus rapat '{{ addslashes($e->title) }}' beserta seluruh data kehadiran?"
+                      data-confirm-title="Hapus Rapat"
                       data-confirm-btn="Ya, Hapus">
                   @csrf @method('DELETE')
                   <button type="submit" title="Hapus Rapat"
@@ -269,97 +262,14 @@
           @empty
             <tr>
               <td colspan="5" class="p-8 text-center text-slate-400 text-sm">
-                Belum ada rapat internal yang sesuai dengan pencarian / filter.
+                Belum ada rapat yang sesuai dengan pencarian / filter.
               </td>
             </tr>
           @endforelse
         </tbody>
       </table>
     </div>
-    <div class="mt-3">{{ $eventsInternal->links() }}</div>
-  </section>
-
-  {{-- =========================================================================
-       TABEL 2 (BAWAH): DAFTAR RAPAT EKSTERNAL
-       ========================================================================= --}}
-  <section class="card mt-6 p-5">
-    <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
-      <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-sm sm:text-base text-[#0F2F5B]">2. Daftar Rapat Eksternal</h3>
-            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60">
-              {{ $eventsEksternal->total() }} Rapat
-            </span>
-          </div>
-          <p class="text-xs text-slate-400 mt-0.5">Rapat koordinasi lintas sektoral, instansi vertikal, dan stakeholder luar</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-4 overflow-x-auto rounded-xl border border-slate-100">
-      <table class="w-full text-sm min-w-[720px] table-fixed">
-        <thead>
-          <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
-            <th class="p-3 pl-5 w-[38%]">Rapat</th>
-            <th class="p-3 w-[24%]">Tanggal</th>
-            <th class="p-3 w-[16%] text-center">Status</th>
-            <th class="p-3 w-[12%] text-center">Hadir</th>
-            <th class="p-3 w-[10%] text-right pr-6">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          @forelse($eventsEksternal as $e)
-            <tr onclick="window.location='{{ route('admin.events.show', $e) }}'"
-                class="border-t border-slate-100 hover:bg-slate-50/70 transition cursor-pointer group">
-              <td class="p-3 pl-5">
-                <span title="{{ $e->title }}"
-                   class="font-bold text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate max-w-[220px] sm:max-w-[280px] block">
-                  {{ $e->title }}
-                </span>
-                @if($e->category)
-                  <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px] sm:max-w-[280px]">{{ $e->category }}</div>
-                @endif
-              </td>
-              <td class="p-3 text-xs text-slate-600 tabular">{{ $e->event_date->format('d M Y') }}</td>
-              <td class="p-3 text-center">
-                {!! $e->is_active
-                  ? '<span class="text-green-700 bg-green-100 px-2.5 py-1 rounded-lg text-xs font-bold">Aktif</span>'
-                  : '<span class="text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg text-xs font-bold">Selesai</span>'
-                !!}
-              </td>
-              <td class="p-3 text-center font-extrabold text-[#0F2F5B] tabular">{{ $e->attendees_count }}</td>
-              <td class="p-3 whitespace-nowrap text-right pr-6" onclick="event.stopPropagation()">
-                <form method="POST" action="{{ route('admin.events.destroy', $e) }}" class="inline"
-                      data-confirm="Hapus rapat eksternal '{{ addslashes($e->title) }}' beserta seluruh data kehadiran?"
-                      data-confirm-title="Hapus Rapat Eksternal"
-                      data-confirm-btn="Ya, Hapus">
-                  @csrf @method('DELETE')
-                  <button type="submit" title="Hapus Rapat"
-                          class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition inline-flex items-center justify-center align-middle cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </form>
-              </td>
-            </tr>
-          @empty
-            <tr>
-              <td colspan="5" class="p-8 text-center text-slate-400 text-sm">
-                Belum ada rapat eksternal yang sesuai dengan pencarian / filter.
-              </td>
-            </tr>
-          @endforelse
-        </tbody>
-      </table>
-    </div>
-    <div class="mt-3">{{ $eventsEksternal->links() }}</div>
+    <div class="mt-3">{{ $events->links() }}</div>
   </section>
 </div>
 
@@ -460,11 +370,18 @@
         ? '<span class="text-green-700 bg-green-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Aktif</span>'
         : '<span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Selesai</span>';
 
+      const tipeBadge = evt.tipe_rapat === 'eksternal'
+        ? '<span class="text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Eksternal</span>'
+        : '<span class="text-[#174A9E] bg-[#EAF0FA] border border-blue-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Internal</span>';
+
       html += `
         <a href="${evt.url}" class="block px-3 py-2 hover:bg-[#EAF0FA] rounded-xl transition group">
           <div class="flex items-start justify-between gap-2">
             <span class="font-bold text-xs text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate">${highlightMatch(evt.title, query)}</span>
-            ${statusBadge}
+            <div class="flex items-center gap-1 shrink-0">
+              ${tipeBadge}
+              ${statusBadge}
+            </div>
           </div>
           <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
             <span>${evt.date}</span>
