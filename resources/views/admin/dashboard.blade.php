@@ -47,6 +47,7 @@
             <div class="h-4 w-48 bg-slate-200 rounded-md"></div>
             <div class="h-2.5 w-24 bg-slate-200 rounded-md"></div>
           </div>
+          <div class="h-6 w-16 bg-slate-200 rounded-lg"></div>
           <div class="h-3.5 w-28 bg-slate-200 rounded-md"></div>
           <div class="h-6 w-16 bg-slate-200 rounded-lg"></div>
           <div class="h-5 w-10 bg-slate-200 rounded-md"></div>
@@ -206,14 +207,15 @@
     </div>
 
     <div class="mt-4 overflow-x-auto rounded-xl border border-slate-100">
-      <table class="w-full text-sm min-w-[720px] table-fixed">
+      <table class="w-full text-sm min-w-[760px] table-fixed">
         <thead>
           <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
-            <th class="p-3 pl-5 w-[42%]">Rapat</th>
-            <th class="p-3 w-[20%]">Tanggal</th>
-            <th class="p-3 w-[14%] text-center">Status</th>
-            <th class="p-3 w-[12%] text-center">Hadir</th>
-            <th class="p-3 w-[12%] text-right pr-6">Aksi</th>
+            <th class="p-3 pl-5 w-[36%]">Rapat</th>
+            <th class="p-3 w-[16%] text-center">Jenis Rapat</th>
+            <th class="p-3 w-[18%]">Tanggal</th>
+            <th class="p-3 w-[11%] text-center">Status</th>
+            <th class="p-3 w-[9%] text-center">Hadir</th>
+            <th class="p-3 w-[10%] text-right pr-6">Aksi</th>
           </tr>
         </thead>
         <tbody>
@@ -221,19 +223,19 @@
             <tr onclick="window.location='{{ route('admin.events.show', $e) }}'"
                 class="border-t border-slate-100 hover:bg-slate-50/70 transition cursor-pointer group">
               <td class="p-3 pl-5">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span title="{{ $e->title }}"
-                     class="font-bold text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate max-w-[200px] sm:max-w-[280px]">
-                    {{ $e->title }}
-                  </span>
-                  @if($e->tipe_rapat === 'eksternal')
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200/60 shrink-0">Eksternal</span>
-                  @else
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#EAF0FA] text-[#174A9E] border border-blue-100 shrink-0">Internal</span>
-                  @endif
-                </div>
+                <span title="{{ $e->title }}"
+                   class="font-bold text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate max-w-[220px] sm:max-w-[300px] block">
+                  {{ $e->title }}
+                </span>
                 @if($e->category)
-                  <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px] sm:max-w-[280px]">{{ $e->category }}</div>
+                  <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px] sm:max-w-[300px]">{{ $e->category }}</div>
+                @endif
+              </td>
+              <td class="p-3 text-center">
+                @if($e->tipe_rapat === 'eksternal')
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 inline-block">Eksternal</span>
+                @else
+                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#EAF0FA] text-[#174A9E] border border-blue-100 inline-block">Internal</span>
                 @endif
               </td>
               <td class="p-3 text-xs text-slate-600 tabular">{{ $e->event_date->format('d M Y') }}</td>
@@ -261,7 +263,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="5" class="p-8 text-center text-slate-400 text-sm">
+              <td colspan="6" class="p-8 text-center text-slate-400 text-sm">
                 Belum ada rapat yang sesuai dengan pencarian / filter.
               </td>
             </tr>
