@@ -135,7 +135,7 @@ class AdminEventController extends Controller
             ->orderBy('id')
             ->get();
 
-        // Urutkan hierarki protokoler: Kepala BNN -> Wakil Kepala -> Pegawai Internal -> Eksternal
+        // Urutkan hierarki protokoler: Kepala BNN -> Kasubbag Umum -> Pegawai Internal -> Eksternal
         $sortedAttendees = $rawAttendees->sort(function ($a, $b) use ($signatories) {
             $isInternalA = $a->kategori_instansi === 'internal';
             $isInternalB = $b->kategori_instansi === 'internal';
@@ -313,7 +313,7 @@ class AdminEventController extends Controller
 
         // Urutkan peserta internal berdasarkan protokoler dinas:
         // 1. Kepala / Ketua BNN Kota Surabaya
-        // 2. Wakil Kepala / Wakil Ketua BNN
+        // 2. Kasubbag Umum (Kepala Subbagian Umum)
         // 3. Pegawai & staf internal lainnya (sesuai urutan kehadiran)
         $attendeesInternal = $attendees->where('kategori_instansi', 'internal')
             ->sort(function ($a, $b) use ($signatories) {
