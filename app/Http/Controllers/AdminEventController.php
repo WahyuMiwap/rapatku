@@ -122,7 +122,8 @@ class AdminEventController extends Controller
         $kategori = $request->query('kategori', 'all');
         $escapedQ = addcslashes($q, '%_\\');
 
-        $attendees = $event->attendees()
+        $signatories = Signatory::active()->get();
+        $rawAttendees = $event->attendees()
             ->when(in_array($kategori, ['internal', 'eksternal']), fn ($query) => $query->where('kategori_instansi', $kategori))
             ->when($q, fn ($query) => $query->where(function ($w) use ($escapedQ) {
                 $w->where('nama', 'like', "%{$escapedQ}%")
@@ -131,10 +132,35 @@ class AdminEventController extends Controller
                     ->orWhere('jabatan', 'like', "%{$escapedQ}%")
                     ->orWhere('no_telp', 'like', "%{$escapedQ}%");
             }))
-            ->orderByRaw("CASE WHEN kategori_instansi = 'internal' THEN 1 ELSE 2 END")
-            ->orderByDesc('id')
-            ->paginate(35)
-            ->withQueryString();
+            ->orderBy('id')
+            ->get();
+
+        // Urutkan hierarki protokoler: Kepala BNN -> Wakil Kepala -> Pegawai Internal -> Eksternal
+        $sortedAttendees = $rawAttendees->sort(function ($a, $b) use ($signatories) {
+            $isInternalA = $a->kategori_instansi === 'internal';
+            $isInternalB = $b->kategori_instansi === 'internal';
+            if ($isInternalA !== $isInternalB) {
+                return $isInternalA ? -1 : 1;
+            }
+            if ($isInternalA) {
+                $rankA = Attendee::getHierarchyRank($a, $signatories);
+                $rankB = Attendee::getHierarchyRank($b, $signatories);
+                if ($rankA !== $rankB) {
+                    return $rankA <=> $rankB;
+                }
+            }
+            return ($a->id ?? 0) <=> ($b->id ?? 0);
+        })->values();
+
+        $page = (int) $request->query('page', 1);
+        $perPage = 50;
+        $attendees = new \Illuminate\Pagination\LengthAwarePaginator(
+            $sortedAttendees->forPage($page, $perPage)->values(),
+            $sortedAttendees->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         $categories = Category::getList();
 
