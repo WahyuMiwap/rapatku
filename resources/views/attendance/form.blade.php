@@ -52,17 +52,6 @@
 
           {{-- Dropdown hasil pencarian pegawai --}}
           <div id="employeeDropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100"></div>
-
-          {{-- Banner info pegawai terpilih --}}
-          <div id="selectedEmployeeBanner" class="hidden mt-2 p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 flex items-center justify-between gap-2">
-            <div class="flex items-center gap-1.5 overflow-hidden">
-              <svg class="w-4 h-4 text-[#174A9E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-              <span class="truncate">Terpilih: <strong id="selectedEmployeeText"></strong></span>
-            </div>
-            <button type="button" id="btnResetEmployee" class="shrink-0 text-red-600 hover:text-red-800 font-bold underline">Ubah</button>
-          </div>
-
-          <p class="text-[11px] text-slate-400 mt-1" id="employeeHintText">Ketik nama untuk memilih pegawai BNN (otomatis mengisi jabatan & divisi).</p>
         </div>
         <div id="wrapDivisi">
           <label class="text-sm font-bold text-[#0F2F5B]">Divisi / Bagian <span class="text-red-500">*</span></label>
@@ -157,23 +146,10 @@ const inputNama = document.getElementById('inputNama');
 const inputEmployeeId = document.getElementById('inputEmployeeId');
 const employeeDropdown = document.getElementById('employeeDropdown');
 const searchSpinner = document.getElementById('searchSpinner');
-const selectedEmployeeBanner = document.getElementById('selectedEmployeeBanner');
-const selectedEmployeeText = document.getElementById('selectedEmployeeText');
-const btnResetEmployee = document.getElementById('btnResetEmployee');
-const employeeHintText = document.getElementById('employeeHintText');
 let searchDebounceTimer = null;
 
 function clearEmployeeSelection() {
   if (inputEmployeeId) inputEmployeeId.value = '';
-  if (selectedEmployeeBanner) selectedEmployeeBanner.classList.add('hidden');
-  if (selectedEmployeeText) selectedEmployeeText.textContent = '';
-}
-
-if (btnResetEmployee) {
-  btnResetEmployee.addEventListener('click', () => {
-    clearEmployeeSelection();
-    if (inputNama) inputNama.focus();
-  });
 }
 
 function selectEmployee(emp) {
@@ -195,12 +171,6 @@ function selectEmployee(emp) {
     if (rad) rad.checked = true;
   }
 
-  if (selectedEmployeeText) {
-    selectedEmployeeText.textContent = `${emp.nama_lengkap} (${emp.jabatan} - ${emp.divisi})`;
-  }
-  if (selectedEmployeeBanner) {
-    selectedEmployeeBanner.classList.remove('hidden');
-  }
   if (employeeDropdown) {
     employeeDropdown.classList.add('hidden');
     employeeDropdown.innerHTML = '';
@@ -212,10 +182,9 @@ if (inputNama) {
     const query = this.value.trim();
     const isInternal = getKategori() === 'internal';
 
-    // Jika sedang terpilih lalu nama diedit manual, lepas status pegawai terpilih
-    if (inputEmployeeId && inputEmployeeId.value) {
+    // Jika sedang terpilih lalu nama diedit manual / dihapus, reset id pegawai
+    if (inputEmployeeId) {
       inputEmployeeId.value = '';
-      if (selectedEmployeeBanner) selectedEmployeeBanner.classList.add('hidden');
     }
 
     if (!isInternal || query.length < 1) {
@@ -288,12 +257,6 @@ document.addEventListener('click', function (e) {
   }
 });
 
-// Restore banner jika ada old employee_id setelah validation error
-if (inputEmployeeId && inputEmployeeId.value && inputNama && inputNama.value) {
-  if (selectedEmployeeText) selectedEmployeeText.textContent = inputNama.value;
-  if (selectedEmployeeBanner) selectedEmployeeBanner.classList.remove('hidden');
-}
-
 function toggleFields() {
   const v = getKategori();
   const isInternal = v === 'internal';
@@ -317,7 +280,6 @@ function toggleFields() {
     inputJabatan.setAttribute('list', isInternal ? 'listJabatanInternal' : '');
   }
 
-  if (employeeHintText) employeeHintText.style.display = isInternal ? '' : 'none';
   if (!isInternal) {
     if (employeeDropdown) employeeDropdown.classList.add('hidden');
     clearEmployeeSelection();
