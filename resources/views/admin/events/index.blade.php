@@ -25,13 +25,20 @@
   <div class="mt-4 overflow-x-auto rounded-xl border border-slate-100">
     <table class="w-full text-sm min-w-[820px]">
       <thead><tr class="text-left bg-[#EDF2F9] text-[#0F2F5B]">
-        <th class="p-3">Rapat</th><th class="p-3">Tanggal</th><th class="p-3">Status</th><th class="p-3">Hadir</th><th class="p-3">Aksi</th>
+        <th class="p-3">Rapat</th><th class="p-3">Tanggal</th><th class="p-3 text-center">Jenis Rapat</th><th class="p-3">Status</th><th class="p-3">Hadir</th><th class="p-3">Aksi</th>
       </tr></thead>
       <tbody>
       @forelse($events as $e)
         <tr class="border-t border-slate-100">
           <td class="p-3"><div class="font-bold">{{ $e->title }}</div><div class="text-[11px] text-slate-400">{{ $e->category }}</div></td>
           <td class="p-3 tabular">{{ $e->event_date->format('d M Y') }}</td>
+          <td class="p-3 text-center">
+            @if($e->tipe_rapat === 'eksternal')
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 inline-block">Eksternal</span>
+            @else
+              <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#EAF0FA] text-[#174A9E] border border-blue-100 inline-block">Internal</span>
+            @endif
+          </td>
           <td class="p-3">{!! $e->is_active ? '<span class="text-green-700 bg-green-100 px-2 py-0.5 rounded-lg text-xs font-bold">Buka</span>' : '<span class="text-red-700 bg-red-100 px-2 py-0.5 rounded-lg text-xs font-bold">Selesai</span>' !!}</td>
           <td class="p-3 font-extrabold tabular">{{ $e->attendees_count }}</td>
           <td class="p-3 whitespace-nowrap text-[13px]">
@@ -43,7 +50,7 @@
           </td>
         </tr>
       @empty
-        <tr><td colspan="5" class="p-6 text-center text-slate-400">Tidak ada rapat yang cocok.</td></tr>
+        <tr><td colspan="6" class="p-6 text-center text-slate-400">Tidak ada rapat yang cocok.</td></tr>
       @endforelse
       </tbody>
     </table>

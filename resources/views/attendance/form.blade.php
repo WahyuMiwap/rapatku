@@ -23,13 +23,18 @@
 
       <form id="absenForm" method="POST" action="{{ route('absen.store', $event->slug) }}" class="mt-1 space-y-4">
         @csrf
-        <div>
-          <span class="text-sm font-bold text-[#0F2F5B]">Kategori Peserta</span>
-          <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-            <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="internal" {{ old('kategori_instansi', $event->tipe_rapat ?? 'internal') === 'internal' ? 'checked' : '' }} required class="accent-[#174A9E]"> <span class="font-semibold">Internal BNN</span></label>
-            <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="eksternal" {{ old('kategori_instansi', $event->tipe_rapat ?? 'internal') === 'eksternal' ? 'checked' : '' }} class="accent-[#174A9E]"> <span class="font-semibold">Eksternal (Tamu)</span></label>
+        @if($event->isEksternal())
+          <div>
+            <span class="text-sm font-bold text-[#0F2F5B]">Kategori Peserta</span>
+            <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+              <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="internal" {{ old('kategori_instansi') === 'internal' ? 'checked' : '' }} required class="accent-[#174A9E]"> <span class="font-semibold">Internal BNN</span></label>
+              <label class="flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]"><input type="radio" name="kategori_instansi" value="eksternal" {{ old('kategori_instansi', 'eksternal') === 'eksternal' ? 'checked' : '' }} class="accent-[#174A9E]"> <span class="font-semibold">Eksternal (Tamu)</span></label>
+            </div>
           </div>
-        </div>
+        @else
+          {{-- Rapat Internal: Kategori otomatis terkunci sebagai Internal BNN, pilihan eksternal disembunyikan --}}
+          <input type="hidden" name="kategori_instansi" id="hiddenKategoriInstansi" value="internal">
+        @endif
         <div>
           <label class="text-sm font-bold text-[#0F2F5B]">Nama lengkap <span class="text-red-500">*</span></label>
           <input name="nama" value="{{ old('nama') }}" required minlength="3" maxlength="100" class="input-bnn mt-1" placeholder="Nama sesuai undangan">
@@ -113,9 +118,16 @@ resizeCanvas();
 document.getElementById('btnClear').addEventListener('click', () => pad.clear());
 
 // Toggle divisi/instansi
-const radios = document.querySelectorAll('input[name=kategori_instansi]');
+const radios = document.querySelectorAll('input[type=radio][name=kategori_instansi]');
+const hiddenKat = document.getElementById('hiddenKategoriInstansi');
+
+function getKategori() {
+  if (hiddenKat) return hiddenKat.value;
+  return document.querySelector('input[type=radio][name=kategori_instansi]:checked')?.value || 'internal';
+}
+
 function toggleFields() {
-  const v = document.querySelector('input[name=kategori_instansi]:checked')?.value;
+  const v = getKategori();
   const isInternal = v === 'internal';
   const wrapDivisi = document.getElementById('wrapDivisi');
   const wrapInstansi = document.getElementById('wrapInstansi');

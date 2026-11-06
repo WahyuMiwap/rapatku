@@ -38,6 +38,15 @@
         <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg {{ $event->isEksternal() ? 'bg-amber-400 text-amber-950 font-bold' : 'bg-white/20 text-white border border-white/30' }}">
           {{ $event->isEksternal() ? 'Rapat Eksternal' : 'Rapat Internal' }}
         </span>
+        <form method="POST" action="{{ route('admin.events.tipe-rapat', $event) }}" class="inline">
+          @csrf @method('PATCH')
+          <input type="hidden" name="tipe_rapat" value="{{ $event->isEksternal() ? 'internal' : 'eksternal' }}">
+          <button type="submit" 
+                  class="text-[11px] font-medium text-white/70 hover:text-white underline transition cursor-pointer"
+                  title="Klik untuk mengubah tipe rapat menjadi {{ $event->isEksternal() ? 'Internal' : 'Eksternal' }}">
+            (Ubah ke {{ $event->isEksternal() ? 'Internal' : 'Eksternal' }})
+          </button>
+        </form>
         @if($event->category)
           <span class="text-xs font-bold text-white/75 uppercase tracking-widest">
             · {{ $event->category }}

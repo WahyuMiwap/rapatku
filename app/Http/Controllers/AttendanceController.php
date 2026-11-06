@@ -67,8 +67,12 @@ class AttendanceController extends Controller
             'no_telp' => Attendee::normalizePhone((string) $request->input('no_telp')),
         ]);
 
+        // Kategori yang diizinkan sesuai tipe rapat:
+        // Rapat internal hanya mengizinkan internal; rapat eksternal mengizinkan internal & eksternal.
+        $allowedKategori = $event->isInternal() ? ['internal'] : ['internal', 'eksternal'];
+
         $validated = $request->validate([
-            'kategori_instansi' => ['required', 'in:internal,eksternal'],
+            'kategori_instansi' => ['required', Rule::in($allowedKategori)],
             'nama' => ['required', 'string', 'min:3', 'max:100'],
             'divisi' => ['required_if:kategori_instansi,internal', 'nullable', 'string', 'max:100'],
             'nama_instansi' => ['required_if:kategori_instansi,eksternal', 'nullable', 'string', 'max:150'],
@@ -80,6 +84,7 @@ class AttendanceController extends Controller
             'jenis_kelamin' => ['required', 'in:L,P'],
             'signature' => ['required', 'string', 'starts_with:data:image/png;base64,'],
         ], [
+            'kategori_instansi.in' => 'Rapat ini bertipe internal BNN, peserta hanya dapat mendaftar sebagai internal.',
             'no_telp.unique' => 'Nomor ini sudah tercatat hadir.',
             'nama_instansi.required_if' => 'Asal instansi / lembaga / tempat wajib diisi untuk peserta eksternal.',
             'jabatan.required' => 'Jabatan wajib diisi.',
