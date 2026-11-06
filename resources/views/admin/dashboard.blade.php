@@ -116,22 +116,10 @@
       </div>
       <div>
         <label class="text-xs font-bold text-[#0F2F5B]">Sifat / Tipe Rapat <span class="text-red-500">*</span></label>
-        <div class="grid grid-cols-2 gap-3 mt-1.5">
-          <label class="flex items-center gap-2.5 p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#EAF0FA] hover:border-[#174A9E] cursor-pointer transition has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA] has-[:checked]:shadow-xs">
-            <input type="radio" name="tipe_rapat" value="internal" checked class="text-[#174A9E] focus:ring-[#174A9E]">
-            <div>
-              <div class="text-xs font-bold text-[#0F2F5B]">Rapat Internal</div>
-              <div class="text-[10px] text-slate-500">Kedinasan internal BNN</div>
-            </div>
-          </label>
-          <label class="flex items-center gap-2.5 p-3 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-[#EAF0FA] hover:border-[#174A9E] cursor-pointer transition has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA] has-[:checked]:shadow-xs">
-            <input type="radio" name="tipe_rapat" value="eksternal" class="text-[#174A9E] focus:ring-[#174A9E]">
-            <div>
-              <div class="text-xs font-bold text-[#0F2F5B]">Rapat Eksternal</div>
-              <div class="text-[10px] text-slate-500">Mitra & instansi luar</div>
-            </div>
-          </label>
-        </div>
+        <select name="tipe_rapat" required class="input-bnn mt-1 cursor-pointer">
+          <option value="internal" selected>Rapat Internal</option>
+          <option value="eksternal">Rapat Eksternal</option>
+        </select>
       </div>
       <div class="grid grid-cols-2 gap-3">
         <div>
