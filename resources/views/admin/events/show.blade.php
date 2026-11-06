@@ -38,15 +38,6 @@
         <span class="inline-block text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg {{ $event->isEksternal() ? 'bg-amber-400 text-amber-950 font-bold' : 'bg-white/20 text-white border border-white/30' }}">
           {{ $event->isEksternal() ? 'Rapat Eksternal' : 'Rapat Internal' }}
         </span>
-        <form method="POST" action="{{ route('admin.events.tipe-rapat', $event) }}" class="inline">
-          @csrf @method('PATCH')
-          <input type="hidden" name="tipe_rapat" value="{{ $event->isEksternal() ? 'internal' : 'eksternal' }}">
-          <button type="submit" 
-                  class="text-[11px] font-medium text-white/70 hover:text-white underline transition cursor-pointer"
-                  title="Klik untuk mengubah tipe rapat menjadi {{ $event->isEksternal() ? 'Internal' : 'Eksternal' }}">
-            (Ubah ke {{ $event->isEksternal() ? 'Internal' : 'Eksternal' }})
-          </button>
-        </form>
         @if($event->category)
           <span class="text-xs font-bold text-white/75 uppercase tracking-widest">
             · {{ $event->category }}
@@ -98,11 +89,13 @@
         <div class="text-[11px] sm:text-xs text-white/80 font-medium mt-2 leading-tight">Internal</div>
       </div>
 
-      {{-- Card Eksternal --}}
+      {{-- Card Eksternal (Hanya muncul jika rapat eksternal) --}}
+      @if($event->isEksternal())
       <div class="w-24 sm:w-28 md:w-32 py-4 px-2 sm:px-3 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/15 text-center transition shadow-inner">
         <div id="eksternalCount" class="text-3xl sm:text-4xl font-extrabold text-sky-200 tabular leading-none">{{ $eksternal }}</div>
         <div class="text-[11px] sm:text-xs text-white/80 font-medium mt-2 leading-tight">Eksternal</div>
       </div>
+      @endif
     </div>
   </div>
 </div>
@@ -220,8 +213,9 @@
     </div>
   </div>
 
+  @if($event->isEksternal())
   {{-- =========================================================================
-       ATAS TABEL: TAB FILTER INTERNAL DAN EKSTERNAL
+       ATAS TABEL: TAB FILTER INTERNAL DAN EKSTERNAL (HANYA RAPAT EKSTERNAL)
        ========================================================================= --}}
   <div class="mt-5 pt-3.5 border-t border-slate-100 flex items-center">
     <div class="inline-flex p-1 bg-slate-100 rounded-2xl gap-1">
@@ -248,6 +242,7 @@
       </a>
     </div>
   </div>
+  @endif
 
   {{-- Tabel Presensi Peserta --}}
   <div class="mt-3 overflow-x-auto rounded-2xl border border-slate-100">
@@ -256,8 +251,10 @@
         <tr class="text-left bg-[#EDF2F9] text-[#0F2F5B] text-xs font-bold">
           <th class="px-3 py-3 w-8 text-center">#</th>
           <th class="px-3 py-3">Nama Lengkap</th>
-          <th class="px-3 py-3">Divisi / Instansi & Jabatan</th>
-          <th class="px-3 py-3 text-center">Kategori</th>
+          <th class="px-3 py-3">{{ $event->isEksternal() ? 'Divisi / Instansi & Jabatan' : 'Divisi & Jabatan' }}</th>
+          @if($event->isEksternal())
+            <th class="px-3 py-3 text-center">Kategori</th>
+          @endif
           <th class="px-3 py-3">No. Telp</th>
           <th class="px-3 py-3 text-center">L/P</th>
           <th class="px-3 py-3">Waktu</th>
@@ -288,9 +285,11 @@
                 @endif
               @endif
             </td>
-            <td class="px-3 py-3 text-center text-xs font-semibold text-slate-700">
-              {{ $a->kategori_instansi === 'internal' ? 'Internal' : 'Eksternal' }}
-            </td>
+            @if($event->isEksternal())
+              <td class="px-3 py-3 text-center text-xs font-semibold text-slate-700">
+                {{ $a->kategori_instansi === 'internal' ? 'Internal' : 'Eksternal' }}
+              </td>
+            @endif
             <td class="px-3 py-3 text-xs tabular text-slate-500">{{ $a->no_telp }}</td>
             <td class="px-3 py-3 text-xs text-slate-500 text-center">{{ $a->jenis_kelamin }}</td>
             <td class="px-3 py-3 text-xs tabular text-slate-400">{{ $a->created_at?->format('d/m H:i') }}</td>
@@ -324,7 +323,7 @@
           </tr>
         @empty
           <tr id="emptyRow">
-            <td colspan="9" class="px-3 py-8 text-center text-slate-400 text-sm">
+            <td colspan="{{ $event->isEksternal() ? 9 : 8 }}" class="px-3 py-8 text-center text-slate-400 text-sm">
               Belum ada peserta yang mendaftar.
             </td>
           </tr>
@@ -417,19 +416,23 @@
   </div>
   <form id="formEditPeserta" method="POST" action="" class="mt-4 space-y-4">
     @csrf @method('PUT')
-    <div>
-      <span class="text-xs font-bold text-[#0F2F5B]">Kategori Instansi</span>
-      <div class="mt-1.5 grid grid-cols-2 gap-2 text-xs">
-        <label class="flex items-center gap-2 border rounded-xl px-3 py-2 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]">
-          <input type="radio" name="kategori_instansi" id="editKatInternal" value="internal" required class="accent-[#174A9E]">
-          <span class="font-semibold">Internal</span>
-        </label>
-        <label class="flex items-center gap-2 border rounded-xl px-3 py-2 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]">
-          <input type="radio" name="kategori_instansi" id="editKatEksternal" value="eksternal" class="accent-[#174A9E]">
-          <span class="font-semibold">Eksternal</span>
-        </label>
+    @if($event->isEksternal())
+      <div>
+        <span class="text-xs font-bold text-[#0F2F5B]">Kategori Instansi</span>
+        <div class="mt-1.5 grid grid-cols-2 gap-2 text-xs">
+          <label class="flex items-center gap-2 border rounded-xl px-3 py-2 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]">
+            <input type="radio" name="kategori_instansi" id="editKatInternal" value="internal" required class="accent-[#174A9E]">
+            <span class="font-semibold">Internal</span>
+          </label>
+          <label class="flex items-center gap-2 border rounded-xl px-3 py-2 cursor-pointer has-[:checked]:border-[#174A9E] has-[:checked]:bg-[#EAF0FA]">
+            <input type="radio" name="kategori_instansi" id="editKatEksternal" value="eksternal" class="accent-[#174A9E]">
+            <span class="font-semibold">Eksternal</span>
+          </label>
+        </div>
       </div>
-    </div>
+    @else
+      <input type="hidden" name="kategori_instansi" id="editKatInternal" value="internal">
+    @endif
     <div>
       <label class="text-xs font-bold text-[#0F2F5B]">Nama Lengkap</label>
       <input type="text" name="nama" id="editNama" required minlength="3" maxlength="100" class="input-bnn mt-1 text-xs">
@@ -668,7 +671,7 @@ function filterClientTab(e, kat) {
       if (tbody) {
         emptyRow = document.createElement('tr');
         emptyRow.id = 'clientEmptyRow';
-        emptyRow.innerHTML = '<td colspan="9" class="px-3 py-8 text-center text-slate-400 text-sm">Tidak ada peserta yang terdaftar pada kategori ini.</td>';
+        emptyRow.innerHTML = '<td colspan="{{ $event->isEksternal() ? 9 : 8 }}" class="px-3 py-8 text-center text-slate-400 text-sm">Tidak ada peserta yang terdaftar pada kategori ini.</td>';
         tbody.appendChild(emptyRow);
       }
     } else {
@@ -681,12 +684,21 @@ function filterClientTab(e, kat) {
 
 function toggleEditFields(val) {
   const isInternal = val === 'internal';
-  document.getElementById('wrapEditDivisi').style.display = isInternal ? '' : 'none';
-  document.getElementById('wrapEditInstansi').style.display = isInternal ? 'none' : '';
-  document.getElementById('wrapEditJabatan').style.display = '';
+  const wrapDiv = document.getElementById('wrapEditDivisi');
+  const wrapIns = document.getElementById('wrapEditInstansi');
+  const wrapJab = document.getElementById('wrapEditJabatan');
+  if (wrapDiv) wrapDiv.style.display = isInternal ? '' : 'none';
+  if (wrapIns) wrapIns.style.display = isInternal ? 'none' : '';
+  if (wrapJab) wrapJab.style.display = '';
 }
-document.getElementById('editKatInternal').addEventListener('change', () => toggleEditFields('internal'));
-document.getElementById('editKatEksternal').addEventListener('change', () => toggleEditFields('eksternal'));
+const editKatInt = document.getElementById('editKatInternal');
+if (editKatInt && editKatInt.type === 'radio') {
+  editKatInt.addEventListener('change', () => toggleEditFields('internal'));
+}
+const editKatEks = document.getElementById('editKatEksternal');
+if (editKatEks) {
+  editKatEks.addEventListener('change', () => toggleEditFields('eksternal'));
+}
 
 function openEditAttendeeModal(a) {
   const modal = document.getElementById('modalEditPeserta');
@@ -716,11 +728,14 @@ function openEditAttendeeModal(a) {
   document.getElementById('editNamaInstansi').value = a.nama_instansi || '';
   document.getElementById('editJabatan').value = a.jabatan || '';
 
-  if (a.kategori_instansi === 'internal') {
-    document.getElementById('editKatInternal').checked = true;
+  const katEksRadio = document.getElementById('editKatEksternal');
+  const katIntRadio = document.getElementById('editKatInternal');
+
+  if (a.kategori_instansi === 'internal' || !katEksRadio) {
+    if (katIntRadio && katIntRadio.type === 'radio') katIntRadio.checked = true;
     toggleEditFields('internal');
   } else {
-    document.getElementById('editKatEksternal').checked = true;
+    katEksRadio.checked = true;
     toggleEditFields('eksternal');
   }
 

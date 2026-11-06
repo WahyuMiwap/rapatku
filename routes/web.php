@@ -32,7 +32,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/events', [AdminEventController::class, 'index'])->name('events.index');
     Route::post('/events', [AdminEventController::class, 'store'])->name('events.store');
     Route::patch('/events/{event}/toggle', [AdminEventController::class, 'toggle'])->name('events.toggle');
-    Route::patch('/events/{event}/tipe-rapat', [AdminEventController::class, 'updateTipeRapat'])->name('events.tipe-rapat');
     Route::delete('/events/{event}', [AdminEventController::class, 'destroy'])->name('events.destroy');
     Route::get('/events/{event}/display', [EventController::class, 'display'])->name('events.display');
     Route::get('/events/{event}/state', [EventController::class, 'state'])->name('events.state');

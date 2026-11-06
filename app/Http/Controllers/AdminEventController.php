@@ -218,21 +218,6 @@ class AdminEventController extends Controller
         return back()->with('ok', $event->is_active ? 'Absen dibuka.' : 'Absen ditutup.');
     }
 
-    public function updateTipeRapat(Request $request, Event $event)
-    {
-        $validated = $request->validate([
-            'tipe_rapat' => ['required', 'in:internal,eksternal'],
-        ]);
-
-        $event->update([
-            'tipe_rapat' => $validated['tipe_rapat'],
-        ]);
-
-        ActivityLog::record('update_event', "Mengubah tipe rapat '{$event->title}' menjadi {$validated['tipe_rapat']}");
-
-        return back()->with('ok', 'Tipe rapat berhasil diubah menjadi ' . ucfirst($validated['tipe_rapat']) . '.');
-    }
-
     public function destroy(Event $event)
     {
         $title = $event->title;
