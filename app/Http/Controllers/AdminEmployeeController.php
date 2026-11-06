@@ -13,7 +13,6 @@ class AdminEmployeeController extends Controller
     {
         $q = trim((string) $request->query('q', ''));
         $divisi = trim((string) $request->query('divisi', 'all'));
-        $status = trim((string) $request->query('status', 'all'));
 
         $escapedQ = addcslashes($q, '%_\\');
 
@@ -26,18 +25,14 @@ class AdminEmployeeController extends Controller
                 });
             })
             ->when($divisi && $divisi !== 'all', fn ($query) => $query->where('divisi', $divisi))
-            ->when($status === 'active', fn ($query) => $query->where('is_active', true))
-            ->when($status === 'inactive', fn ($query) => $query->where('is_active', false))
             ->orderBy('nama_lengkap')
             ->paginate(15)
             ->withQueryString();
 
         $categories = Category::getList();
-        $totalActive = Employee::where('is_active', true)->count();
-        $totalInactive = Employee::where('is_active', false)->count();
 
         return view('admin.employees.index', compact(
-            'employees', 'categories', 'q', 'divisi', 'status', 'totalActive', 'totalInactive'
+            'employees', 'categories', 'q', 'divisi'
         ));
     }
 
@@ -97,16 +92,6 @@ class AdminEmployeeController extends Controller
         ActivityLog::record('delete_employee', "Menghapus pegawai: {$name}");
 
         return back()->with('ok', "Data pegawai '{$name}' berhasil dihapus.");
-    }
-
-    public function toggle(Employee $employee)
-    {
-        $employee->update(['is_active' => ! $employee->is_active]);
-
-        $statusText = $employee->is_active ? 'diaktifkan' : 'dinonaktifkan';
-        ActivityLog::record('toggle_employee', "Status pegawai {$employee->nama_lengkap} {$statusText}");
-
-        return back()->with('ok', "Pegawai '{$employee->nama_lengkap}' berhasil {$statusText}.");
     }
 }
 

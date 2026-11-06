@@ -63,7 +63,7 @@ class AttendanceController extends Controller
             return response()->json(['employees' => []]);
         }
 
-        $employees = Employee::active()
+        $employees = Employee::query()
             ->where(function ($w) use ($query) {
                 $w->where('nama_lengkap', 'like', "%{$query}%")
                     ->orWhere('jabatan', 'like', "%{$query}%");

@@ -58,7 +58,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/employees', [AdminEmployeeController::class, 'store'])->name('employees.store');
     Route::put('/employees/{employee}', [AdminEmployeeController::class, 'update'])->name('employees.update');
     Route::delete('/employees/{employee}', [AdminEmployeeController::class, 'destroy'])->name('employees.destroy');
-    Route::patch('/employees/{employee}/toggle', [AdminEmployeeController::class, 'toggle'])->name('employees.toggle');
 
     // Pengaturan Akun Pribadi (Tersedia untuk semua admin)
     Route::get('/settings', [AdminEventController::class, 'settings'])->name('settings.index');
