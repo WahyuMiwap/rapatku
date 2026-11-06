@@ -32,3 +32,4 @@ class Employee extends Model
         return $this->hasMany(Attendee::class);
     }
 }
+

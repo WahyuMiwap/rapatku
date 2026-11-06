@@ -109,3 +109,4 @@ class AdminEmployeeController extends Controller
         return back()->with('ok', "Pegawai '{$employee->nama_lengkap}' berhasil {$statusText}.");
     }
 }
+

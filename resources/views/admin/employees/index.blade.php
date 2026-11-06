@@ -299,3 +299,4 @@ function openEditEmployeeModal(emp) {
 </script>
 @endpush
 @endsection
+
