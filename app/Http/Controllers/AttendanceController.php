@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendee;
 use App\Models\Category;
+use App\Models\Employee;
 use App\Models\Event;
 use App\Services\QrTokenService;
 use Illuminate\Database\QueryException;
@@ -49,6 +50,31 @@ class AttendanceController extends Controller
         return view('attendance.form', ['event' => $event, 'categories' => $categories]);
     }
 
+    public function searchEmployee(Request $request, string $slug)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+
+        if (! $event->is_active) {
+            return response()->json(['employees' => []], 403);
+        }
+
+        $query = trim((string) $request->input('q', ''));
+        if (mb_strlen($query) < 1) {
+            return response()->json(['employees' => []]);
+        }
+
+        $employees = Employee::active()
+            ->where(function ($w) use ($query) {
+                $w->where('nama_lengkap', 'like', "%{$query}%")
+                    ->orWhere('jabatan', 'like', "%{$query}%");
+            })
+            ->orderBy('nama_lengkap', 'asc')
+            ->limit(10)
+            ->get(['id', 'nama_lengkap', 'jabatan', 'divisi', 'jenis_kelamin']);
+
+        return response()->json(['employees' => $employees]);
+    }
+
     public function store(Request $request, string $slug)
     {
         $event = Event::where('slug', $slug)->firstOrFail();
@@ -72,6 +98,7 @@ class AttendanceController extends Controller
         $allowedKategori = $event->isInternal() ? ['internal'] : ['internal', 'eksternal'];
 
         $validated = $request->validate([
+            'employee_id' => ['nullable', 'integer', 'exists:employees,id'],
             'kategori_instansi' => ['required', Rule::in($allowedKategori)],
             'nama' => ['required', 'string', 'min:3', 'max:100'],
             'divisi' => ['required_if:kategori_instansi,internal', 'nullable', 'string', 'max:100'],
@@ -109,12 +136,15 @@ class AttendanceController extends Controller
             Storage::disk('local')->put($path, $decoded);
 
             $attendee = DB::transaction(function () use ($event, $validated, $path) {
+                $isInternal = $validated['kategori_instansi'] === 'internal';
+
                 return Attendee::create([
                     'event_id' => $event->id,
+                    'employee_id' => $isInternal ? ($validated['employee_id'] ?? null) : null,
                     'kategori_instansi' => $validated['kategori_instansi'],
                     'nama' => $validated['nama'],
-                    'divisi' => $validated['kategori_instansi'] === 'internal' ? ($validated['divisi'] ?? null) : null,
-                    'nama_instansi' => $validated['kategori_instansi'] === 'eksternal' ? ($validated['nama_instansi'] ?? null) : null,
+                    'divisi' => $isInternal ? ($validated['divisi'] ?? null) : null,
+                    'nama_instansi' => ! $isInternal ? ($validated['nama_instansi'] ?? null) : null,
                     'jabatan' => $validated['jabatan'] ?? null,
                     'no_telp' => $validated['no_telp'],
                     'jenis_kelamin' => $validated['jenis_kelamin'],

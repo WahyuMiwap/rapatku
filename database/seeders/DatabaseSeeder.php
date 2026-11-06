@@ -71,5 +71,57 @@ class DatabaseSeeder extends Seeder
                 $sig
             );
         }
+
+        $defaultEmployees = [
+            [
+                'nama_lengkap' => 'Kombes Pol. Heru Prasetyo, S.I.K., M.Hum.',
+                'jabatan' => 'Kepala BNN Kota Surabaya',
+                'divisi' => 'Sub Bagian Umum',
+                'jenis_kelamin' => 'L',
+                'is_active' => true,
+            ],
+            [
+                'nama_lengkap' => 'Kasubbag Umum BNN Kota Surabaya',
+                'jabatan' => 'Kasubbag Umum',
+                'divisi' => 'Sub Bagian Umum',
+                'jenis_kelamin' => 'L',
+                'is_active' => true,
+            ],
+            [
+                'nama_lengkap' => 'Moch. Roano Ardiansyah',
+                'jabatan' => 'Staf Pelaksana P2M',
+                'divisi' => 'P2M',
+                'jenis_kelamin' => 'L',
+                'is_active' => true,
+            ],
+            [
+                'nama_lengkap' => 'Ahmad Fauzi, S.H.',
+                'jabatan' => 'Katim Pemberantasan',
+                'divisi' => 'Brantas',
+                'jenis_kelamin' => 'L',
+                'is_active' => true,
+            ],
+            [
+                'nama_lengkap' => 'dr. Siti Rahmawati',
+                'jabatan' => 'Katim Rehabilitasi',
+                'divisi' => 'Rehabilitasi',
+                'jenis_kelamin' => 'P',
+                'is_active' => true,
+            ],
+            [
+                'nama_lengkap' => 'Budi Santoso, S.Sos.',
+                'jabatan' => 'Katim P2M',
+                'divisi' => 'P2M',
+                'jenis_kelamin' => 'L',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($defaultEmployees as $emp) {
+            \App\Models\Employee::firstOrCreate(
+                ['nama_lengkap' => $emp['nama_lengkap']],
+                $emp
+            );
+        }
     }
 }

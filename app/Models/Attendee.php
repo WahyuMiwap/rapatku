@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 class Attendee extends Model
 {
     protected $fillable = [
-        'uuid', 'event_id', 'kategori_instansi', 'nama', 'divisi', 'nama_instansi', 'jabatan',
+        'uuid', 'event_id', 'employee_id', 'kategori_instansi', 'nama', 'divisi', 'nama_instansi', 'jabatan',
         'no_telp', 'jenis_kelamin', 'agree_resume', 'agree_daftar_hadir',
         'signature_path',
     ];
@@ -46,6 +46,11 @@ class Attendee extends Model
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
     }
 
     /** Normalisasi nomor ke digit saja: "+62 812-..." -> "62812..." */

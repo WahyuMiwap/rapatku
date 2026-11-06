@@ -35,9 +35,34 @@
           {{-- Rapat Internal: Kategori otomatis terkunci sebagai Internal BNN, pilihan eksternal disembunyikan --}}
           <input type="hidden" name="kategori_instansi" id="hiddenKategoriInstansi" value="internal">
         @endif
-        <div>
+
+        <input type="hidden" name="employee_id" id="inputEmployeeId" value="{{ old('employee_id') }}">
+
+        <div class="relative">
           <label class="text-sm font-bold text-[#0F2F5B]">Nama lengkap <span class="text-red-500">*</span></label>
-          <input name="nama" value="{{ old('nama') }}" required minlength="3" maxlength="100" class="input-bnn mt-1" placeholder="Nama sesuai undangan">
+          <div class="relative mt-1">
+            <input name="nama" id="inputNama" value="{{ old('nama') }}" required minlength="3" maxlength="100" class="input-bnn" placeholder="Nama sesuai undangan" autocomplete="off">
+            <div id="searchSpinner" class="hidden absolute right-3 top-1/2 -translate-y-1/2">
+              <svg class="animate-spin h-4 w-4 text-[#174A9E]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+            </div>
+          </div>
+
+          {{-- Dropdown hasil pencarian pegawai --}}
+          <div id="employeeDropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 max-h-60 overflow-y-auto divide-y divide-slate-100"></div>
+
+          {{-- Banner info pegawai terpilih --}}
+          <div id="selectedEmployeeBanner" class="hidden mt-2 p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 overflow-hidden">
+              <svg class="w-4 h-4 text-[#174A9E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span class="truncate">Terpilih: <strong id="selectedEmployeeText"></strong></span>
+            </div>
+            <button type="button" id="btnResetEmployee" class="shrink-0 text-red-600 hover:text-red-800 font-bold underline">Ubah</button>
+          </div>
+
+          <p class="text-[11px] text-slate-400 mt-1" id="employeeHintText">Ketik nama untuk memilih pegawai BNN (otomatis mengisi jabatan & divisi).</p>
         </div>
         <div id="wrapDivisi">
           <label class="text-sm font-bold text-[#0F2F5B]">Divisi / Bagian <span class="text-red-500">*</span></label>
@@ -126,6 +151,149 @@ function getKategori() {
   return document.querySelector('input[type=radio][name=kategori_instansi]:checked')?.value || 'internal';
 }
 
+// Autocomplete Pegawai Internal
+const searchUrl = @json(route('absen.pegawai.search', $event->slug));
+const inputNama = document.getElementById('inputNama');
+const inputEmployeeId = document.getElementById('inputEmployeeId');
+const employeeDropdown = document.getElementById('employeeDropdown');
+const searchSpinner = document.getElementById('searchSpinner');
+const selectedEmployeeBanner = document.getElementById('selectedEmployeeBanner');
+const selectedEmployeeText = document.getElementById('selectedEmployeeText');
+const btnResetEmployee = document.getElementById('btnResetEmployee');
+const employeeHintText = document.getElementById('employeeHintText');
+let searchDebounceTimer = null;
+
+function clearEmployeeSelection() {
+  if (inputEmployeeId) inputEmployeeId.value = '';
+  if (selectedEmployeeBanner) selectedEmployeeBanner.classList.add('hidden');
+  if (selectedEmployeeText) selectedEmployeeText.textContent = '';
+}
+
+if (btnResetEmployee) {
+  btnResetEmployee.addEventListener('click', () => {
+    clearEmployeeSelection();
+    if (inputNama) inputNama.focus();
+  });
+}
+
+function selectEmployee(emp) {
+  if (inputNama) inputNama.value = emp.nama_lengkap;
+  if (inputEmployeeId) inputEmployeeId.value = emp.id;
+  
+  const inputJabatan = document.getElementById('inputJabatan');
+  if (inputJabatan && emp.jabatan) {
+    inputJabatan.value = emp.jabatan;
+  }
+  
+  const selectDivisi = document.getElementById('selectDivisi');
+  if (selectDivisi && emp.divisi) {
+    selectDivisi.value = emp.divisi;
+  }
+  
+  if (emp.jenis_kelamin) {
+    const rad = document.querySelector(`input[name="jenis_kelamin"][value="${emp.jenis_kelamin}"]`);
+    if (rad) rad.checked = true;
+  }
+
+  if (selectedEmployeeText) {
+    selectedEmployeeText.textContent = `${emp.nama_lengkap} (${emp.jabatan} - ${emp.divisi})`;
+  }
+  if (selectedEmployeeBanner) {
+    selectedEmployeeBanner.classList.remove('hidden');
+  }
+  if (employeeDropdown) {
+    employeeDropdown.classList.add('hidden');
+    employeeDropdown.innerHTML = '';
+  }
+}
+
+if (inputNama) {
+  inputNama.addEventListener('input', function () {
+    const query = this.value.trim();
+    const isInternal = getKategori() === 'internal';
+
+    // Jika sedang terpilih lalu nama diedit manual, lepas status pegawai terpilih
+    if (inputEmployeeId && inputEmployeeId.value) {
+      inputEmployeeId.value = '';
+      if (selectedEmployeeBanner) selectedEmployeeBanner.classList.add('hidden');
+    }
+
+    if (!isInternal || query.length < 1) {
+      if (employeeDropdown) {
+        employeeDropdown.classList.add('hidden');
+        employeeDropdown.innerHTML = '';
+      }
+      return;
+    }
+
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      if (searchSpinner) searchSpinner.classList.remove('hidden');
+      fetch(`${searchUrl}?q=${encodeURIComponent(query)}`, {
+        headers: { 'Accept': 'application/json' }
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (searchSpinner) searchSpinner.classList.add('hidden');
+          const emps = data.employees || [];
+          if (emps.length === 0) {
+            employeeDropdown.innerHTML = `
+              <div class="p-3 text-xs text-slate-500 text-center">
+                Nama tidak ditemukan di data pegawai.<br>
+                <span class="text-slate-400">Silakan lanjutkan ketik manual.</span>
+              </div>
+            `;
+            employeeDropdown.classList.remove('hidden');
+            return;
+          }
+
+          let html = '';
+          emps.forEach(emp => {
+            const badgeClass = emp.jenis_kelamin === 'L' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700';
+            const genderText = emp.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan';
+            const safeEmp = JSON.stringify(emp).replace(/'/g, '&#39;');
+            html += `
+              <button type="button" class="emp-item w-full text-left px-3.5 py-2.5 hover:bg-blue-50 transition flex items-center justify-between gap-2 group" data-emp='${safeEmp}'>
+                <div class="overflow-hidden">
+                  <div class="text-sm font-semibold text-slate-800 group-hover:text-[#174A9E] truncate">${emp.nama_lengkap}</div>
+                  <div class="text-xs text-slate-500 truncate">${emp.jabatan || '-'} · <span class="font-medium text-slate-600">${emp.divisi || '-'}</span></div>
+                </div>
+                <div class="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${badgeClass}">
+                  ${genderText}
+                </div>
+              </button>
+            `;
+          });
+          employeeDropdown.innerHTML = html;
+          employeeDropdown.classList.remove('hidden');
+
+          employeeDropdown.querySelectorAll('.emp-item').forEach(btn => {
+            btn.addEventListener('click', function () {
+              const empData = JSON.parse(this.getAttribute('data-emp'));
+              selectEmployee(empData);
+            });
+          });
+        })
+        .catch(() => {
+          if (searchSpinner) searchSpinner.classList.add('hidden');
+        });
+    }, 250);
+  });
+}
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', function (e) {
+  if (employeeDropdown && !employeeDropdown.contains(e.target) && e.target !== inputNama) {
+    employeeDropdown.classList.add('hidden');
+  }
+});
+
+// Restore banner jika ada old employee_id setelah validation error
+if (inputEmployeeId && inputEmployeeId.value && inputNama && inputNama.value) {
+  if (selectedEmployeeText) selectedEmployeeText.textContent = inputNama.value;
+  if (selectedEmployeeBanner) selectedEmployeeBanner.classList.remove('hidden');
+}
+
 function toggleFields() {
   const v = getKategori();
   const isInternal = v === 'internal';
@@ -147,6 +315,12 @@ function toggleFields() {
       ? 'cth. Kepala BNN / Kasubbag Umum / Katim / Staf'
       : 'cth. Kepala Dinas / Camat / Guru / Anggota';
     inputJabatan.setAttribute('list', isInternal ? 'listJabatanInternal' : '');
+  }
+
+  if (employeeHintText) employeeHintText.style.display = isInternal ? '' : 'none';
+  if (!isInternal) {
+    if (employeeDropdown) employeeDropdown.classList.add('hidden');
+    clearEmployeeSelection();
   }
 }
 radios.forEach(r => r.addEventListener('change', toggleFields));

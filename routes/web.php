@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminAttendeeController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminEmployeeController;
 use App\Http\Controllers\AdminEventController;
 use App\Http\Controllers\AdminLogController;
 use App\Http\Controllers\AdminUserController;
@@ -21,6 +22,7 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
 // Publik: peserta (token QR + session, bukan sekadar slug)
 Route::get('/absen/{slug}', [AttendanceController::class, 'create'])->name('absen.create');
+Route::get('/absen/{slug}/pegawai/search', [AttendanceController::class, 'searchEmployee'])->name('absen.pegawai.search');
 Route::post('/absen/{slug}', [AttendanceController::class, 'store'])
     ->middleware('throttle:absen')->name('absen.store');
 Route::get('/absen/{slug}/sukses', [AttendanceController::class, 'success'])->name('absen.success');
@@ -50,6 +52,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/attendees/{attendee}', [AdminAttendeeController::class, 'update'])->name('attendees.update');
     Route::delete('/attendees/{attendee}', [AdminAttendeeController::class, 'destroy'])->name('attendees.destroy');
     Route::get('/attendees/{attendee}/signature', [AdminAttendeeController::class, 'signature'])->name('attendees.signature');
+
+    // Kelola Master Data Pegawai
+    Route::get('/employees', [AdminEmployeeController::class, 'index'])->name('employees.index');
+    Route::post('/employees', [AdminEmployeeController::class, 'store'])->name('employees.store');
+    Route::put('/employees/{employee}', [AdminEmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('/employees/{employee}', [AdminEmployeeController::class, 'destroy'])->name('employees.destroy');
+    Route::patch('/employees/{employee}/toggle', [AdminEmployeeController::class, 'toggle'])->name('employees.toggle');
 
     // Pengaturan Akun Pribadi (Tersedia untuk semua admin)
     Route::get('/settings', [AdminEventController::class, 'settings'])->name('settings.index');
