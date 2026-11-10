@@ -11,6 +11,8 @@
 <meta name="theme-color" content="#0F2F5B">
 <script src="{{ asset('js/tailwindcdn.js') }}"></script>
 <style>
+  html { scroll-behavior: smooth; }
+  section[id] { scroll-margin-top: 1.5rem; }
   :root{
     --bnn: #174A9E;
     --bnn-dark: #0F2F5B;

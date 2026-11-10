@@ -53,7 +53,7 @@
               <div id="submenuPengaturan" class="{{ $isSettingsGroupActive ? '' : 'hidden' }} ml-3 pl-2.5 border-l-2 border-white/15 space-y-1 pt-1 pb-1">
                 {{-- Sub-Item 1: Data Pegawai --}}
                 <a href="{{ route('admin.employees.index') }}"
-                   class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs transition {{ $active === 'employees' ? 'bg-white text-[#0F2F5B] font-extrabold shadow-sm' : 'text-blue-200/80 hover:text-white hover:bg-white/10 font-medium' }}">
+                   class="sub-link-item flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs transition {{ $active === 'employees' ? 'bg-white text-[#0F2F5B] font-extrabold shadow-sm' : 'text-blue-200/80 hover:text-white hover:bg-white/10 font-medium' }}">
                   <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
@@ -61,8 +61,9 @@
                 </a>
 
                 {{-- Sub-Item 2: Profil & Password --}}
-                <a href="{{ route('admin.settings.index') }}"
-                   class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs transition {{ $active === 'settings' ? 'bg-white text-[#0F2F5B] font-extrabold shadow-sm' : 'text-blue-200/80 hover:text-white hover:bg-white/10 font-medium' }}">
+                <a href="{{ route('admin.settings.index') }}#profil"
+                   data-section="profil"
+                   class="sub-link-item flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs transition {{ ($active === 'settings') ? 'bg-white text-[#0F2F5B] font-extrabold shadow-sm' : 'text-blue-200/80 hover:text-white hover:bg-white/10 font-medium' }}">
                   <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -72,7 +73,8 @@
                 @if(auth()->user()?->isSuperAdmin())
                   {{-- Sub-Item 3: Penandatangan --}}
                   <a href="{{ route('admin.settings.index') }}#penandatangan"
-                     class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
+                     data-section="penandatangan"
+                     class="sub-link-item flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
@@ -81,7 +83,8 @@
 
                   {{-- Sub-Item 4: Kategori Rapat --}}
                   <a href="{{ route('admin.settings.index') }}#kategori"
-                     class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
+                     data-section="kategori"
+                     class="sub-link-item flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
@@ -90,7 +93,8 @@
 
                   {{-- Sub-Item 5: Admin Panitia --}}
                   <a href="{{ route('admin.settings.index') }}#users"
-                     class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
+                     data-section="users"
+                     class="sub-link-item flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
@@ -99,7 +103,8 @@
 
                   {{-- Sub-Item 6: Logo & Background --}}
                   <a href="{{ route('admin.settings.index') }}#logo"
-                     class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
+                     data-section="logo"
+                     class="sub-link-item flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition text-blue-200/80 hover:text-white hover:bg-white/10">
                     <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -204,19 +209,98 @@ function toggleSubmenuPengaturan() {
   }
 }
 
-// Highlight sub-menu berdasarkan anchor hash di URL saat halaman settings aktif
-window.addEventListener('DOMContentLoaded', () => {
-  if (window.location.hash) {
-    const hash = window.location.hash;
-    const matchLink = document.querySelector(`#submenuPengaturan a[href*="${hash}"]`);
-    if (matchLink) {
-      document.querySelectorAll('#submenuPengaturan a').forEach(el => {
-        el.classList.remove('bg-white', 'text-[#0F2F5B]', 'font-bold', 'font-extrabold', 'shadow-sm');
-        if (!el.classList.contains('text-blue-200/80')) el.classList.add('text-blue-200/80');
-      });
-      matchLink.classList.remove('text-blue-200/80');
-      matchLink.classList.add('bg-white', 'text-[#0F2F5B]', 'font-bold', 'shadow-sm');
+// Helper: set link sub-menu aktif (latar putih dengan teks gelap)
+function setActiveSubmenu(targetLink) {
+  if (!targetLink) return;
+  const allSubLinks = document.querySelectorAll('#submenuPengaturan .sub-link-item');
+  allSubLinks.forEach(el => {
+    el.classList.remove('bg-white', 'text-[#0F2F5B]', 'font-extrabold', 'shadow-sm');
+    if (!el.classList.contains('text-blue-200/80')) el.classList.add('text-blue-200/80');
+    if (!el.classList.contains('font-medium')) el.classList.add('font-medium');
+  });
+  targetLink.classList.remove('text-blue-200/80', 'font-medium');
+  targetLink.classList.add('bg-white', 'text-[#0F2F5B]', 'font-extrabold', 'shadow-sm');
+}
+
+// Inisialisasi navigasi sub-menu & scrollspy di halaman pengaturan
+document.addEventListener('DOMContentLoaded', () => {
+  const isSettingsPage = window.location.pathname.includes('/admin/settings');
+  const subLinks = document.querySelectorAll('#submenuPengaturan .sub-link-item');
+
+  function updateActiveByHash() {
+    if (!isSettingsPage) return;
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      const matchLink = document.querySelector(`#submenuPengaturan a[data-section="${hash}"]`);
+      if (matchLink) {
+        setActiveSubmenu(matchLink);
+        return;
+      }
     }
+    const profilLink = document.querySelector('#submenuPengaturan a[data-section="profil"]');
+    if (profilLink) {
+      setActiveSubmenu(profilLink);
+    }
+  }
+
+  // 1. Sinkronisasi aktif saat halaman pertama dibuka
+  updateActiveByHash();
+
+  // 2. Sinkronisasi saat URL hash berubah
+  window.addEventListener('hashchange', updateActiveByHash);
+
+  // 3. Listener klik pada sub-menu (pindah warna putih langsung & smooth scroll)
+  let isScrollingFromClick = false;
+  let scrollTimer = null;
+
+  subLinks.forEach(link => {
+    link.addEventListener('click', function (e) {
+      const sectionId = this.dataset.section;
+      if (sectionId && isSettingsPage) {
+        const targetEl = document.getElementById(sectionId);
+        if (targetEl) {
+          e.preventDefault();
+          setActiveSubmenu(this);
+
+          isScrollingFromClick = true;
+          clearTimeout(scrollTimer);
+          scrollTimer = setTimeout(() => {
+            isScrollingFromClick = false;
+          }, 800);
+
+          history.pushState(null, null, '#' + sectionId);
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+  });
+
+  // 4. ScrollSpy: warna putih otomatis mengikuti section yang sedang dilihat saat di-scroll
+  if (isSettingsPage && 'IntersectionObserver' in window) {
+    const sectionIds = ['profil', 'users', 'kategori', 'penandatangan', 'logo'];
+    const sections = sectionIds
+      .map(id => document.getElementById(id))
+      .filter(el => el !== null);
+
+    const observer = new IntersectionObserver((entries) => {
+      if (isScrollingFromClick) return;
+
+      const intersecting = entries.filter(entry => entry.isIntersecting);
+      if (intersecting.length > 0) {
+        intersecting.sort((a, b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top));
+        const activeId = intersecting[0].target.id;
+        const matchLink = document.querySelector(`#submenuPengaturan a[data-section="${activeId}"]`);
+        if (matchLink) {
+          setActiveSubmenu(matchLink);
+        }
+      }
+    }, {
+      root: null,
+      rootMargin: '-10% 0px -60% 0px',
+      threshold: [0, 0.25, 0.5, 0.75]
+    });
+
+    sections.forEach(sec => observer.observe(sec));
   }
 });
 </script>
