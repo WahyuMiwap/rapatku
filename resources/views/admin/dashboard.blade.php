@@ -47,7 +47,7 @@
             <div class="h-4 w-48 bg-slate-200 rounded-md"></div>
             <div class="h-2.5 w-24 bg-slate-200 rounded-md"></div>
           </div>
-          <div class="h-6 w-16 bg-slate-200 rounded-lg"></div>
+          <div class="h-3.5 w-16 bg-slate-200 rounded-md"></div>
           <div class="h-3.5 w-28 bg-slate-200 rounded-md"></div>
           <div class="h-6 w-16 bg-slate-200 rounded-lg"></div>
           <div class="h-5 w-10 bg-slate-200 rounded-md"></div>
@@ -219,12 +219,8 @@
                   <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[220px] sm:max-w-[300px]">{{ $e->category }}</div>
                 @endif
               </td>
-              <td class="p-3 text-center">
-                @if($e->tipe_rapat === 'eksternal')
-                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 inline-block">Eksternal</span>
-                @else
-                  <span class="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#EAF0FA] text-[#174A9E] border border-blue-100 inline-block">Internal</span>
-                @endif
+              <td class="p-3 text-center text-xs text-slate-600">
+                {{ $e->tipe_rapat === 'eksternal' ? 'Eksternal' : 'Internal' }}
               </td>
               <td class="p-3 text-xs text-slate-600 tabular">{{ $e->event_date->format('d M Y') }}</td>
               <td class="p-3 text-center">
@@ -360,21 +356,20 @@
         ? '<span class="text-green-700 bg-green-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Aktif</span>'
         : '<span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Selesai</span>';
 
-      const tipeBadge = evt.tipe_rapat === 'eksternal'
-        ? '<span class="text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Eksternal</span>'
-        : '<span class="text-[#174A9E] bg-[#EAF0FA] border border-blue-100 px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0">Internal</span>';
+      const tipeLabel = evt.tipe_rapat === 'eksternal' ? 'Eksternal' : 'Internal';
 
       html += `
         <a href="${evt.url}" class="block px-3 py-2 hover:bg-[#EAF0FA] rounded-xl transition group">
           <div class="flex items-start justify-between gap-2">
             <span class="font-bold text-xs text-[#0F2F5B] group-hover:text-[#174A9E] transition truncate">${highlightMatch(evt.title, query)}</span>
             <div class="flex items-center gap-1 shrink-0">
-              ${tipeBadge}
               ${statusBadge}
             </div>
           </div>
           <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
             <span>${evt.date}</span>
+            <span>•</span>
+            <span class="text-slate-500">${tipeLabel}</span>
             ${evt.category ? `<span>•</span><span class="text-slate-500">${escapeHtml(evt.category)}</span>` : ''}
           </div>
         </a>
